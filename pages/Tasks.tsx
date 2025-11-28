@@ -113,11 +113,14 @@ export const TasksPage: React.FC = () => {
     const inputClass = "appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm bg-white text-gray-900";
 
     return (
-        <div className="space-y-6 relative h-full">
-            <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold text-gray-900">Tarefas</h1>
-                <button onClick={() => setShowCreateModal(true)} className="flex items-center space-x-2 bg-primary-600 text-white px-4 py-2 rounded-md hover:bg-primary-700">
-                    <Plus size={20} /> <span>Nova Tarefa</span>
+        <div className="space-y-6 relative h-full animate-fade-in">
+            <div className="flex justify-between items-center animate-slide-down">
+                <div>
+                    <h1 className="text-3xl font-bold text-gray-900">Tarefas</h1>
+                    <p className="text-gray-500 mt-1">Gerencie e acompanhe suas tarefas</p>
+                </div>
+                <button onClick={() => setShowCreateModal(true)} className="btn-premium flex items-center space-x-2 bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white px-6 py-3 rounded-lg shadow-md transition-all duration-200">
+                    <Plus size={20} /> <span className="font-semibold">Nova Tarefa</span>
                 </button>
             </div>
 
@@ -133,17 +136,17 @@ export const TasksPage: React.FC = () => {
                     const isPrivate = !task.assigneeId;
 
                     return (
-                        <div key={task.id} className="bg-white p-5 rounded-lg shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between hover:shadow-md transition cursor-pointer" onClick={() => setSelectedTask(task)}>
+                        <div key={task.id} className="card-premium stagger-item p-5 flex flex-col md:flex-row justify-between cursor-pointer group" onClick={() => setSelectedTask(task)}>
                             <div className="flex-1">
                                 <div className="flex items-center space-x-3 mb-2">
                                     <h3 className="font-bold text-lg text-gray-900">{task.title}</h3>
-                                    <span className={`text-xs px-2 py-1 rounded font-medium ${task.priority === 'Alta' ? 'bg-red-100 text-red-800' :
+                                    <span className={`badge text-xs px-2 py-1 rounded font-medium transition-transform group-hover:scale-110 ${task.priority === 'Alta' ? 'badge-error' :
                                         task.priority === 'Média' ? 'bg-yellow-100 text-yellow-800' :
                                             'bg-green-100 text-green-800'
                                         }`}>
                                         {task.priority}
                                     </span>
-                                    <span className={`text-xs px-2 py-1 rounded font-medium ${task.status === 'Concluída' ? 'bg-green-100 text-green-800' :
+                                    <span className={`badge text-xs px-2 py-1 rounded font-medium transition-transform group-hover:scale-110 ${task.status === 'Concluída' ? 'badge-success' :
                                         task.status === 'Aguardando Aprovação' ? 'bg-blue-100 text-blue-800' :
                                             'bg-gray-100 text-gray-600'
                                         }`}>
@@ -175,7 +178,7 @@ export const TasksPage: React.FC = () => {
                             </div>
 
                             <div className="mt-4 md:mt-0 md:ml-6 flex items-center justify-end">
-                                <ChevronRight size={24} className="text-gray-300" />
+                                <ChevronRight size={24} className="text-gray-300 group-hover:text-primary-500 group-hover:translate-x-1 transition-all" />
                             </div>
                         </div>
                     );
@@ -184,8 +187,8 @@ export const TasksPage: React.FC = () => {
 
             {/* --- DETAILS & COMMENTS MODAL --- */}
             {selectedTask && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-end z-50">
-                    <div className="bg-white w-full max-w-xl h-full shadow-2xl overflow-y-auto flex flex-col animate-slide-in-right">
+                <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex justify-end z-50 animate-fade-in">
+                    <div className="bg-white w-full max-w-xl h-full shadow-2xl overflow-y-auto flex flex-col animate-slide-left">
                         {/* Header */}
                         <div className="p-6 border-b border-gray-100 flex justify-between items-start sticky top-0 bg-white z-10">
                             <div>
@@ -204,7 +207,7 @@ export const TasksPage: React.FC = () => {
                                 </div>
                                 <h2 className="text-xl font-bold text-gray-900">{selectedTask.title}</h2>
                             </div>
-                            <button onClick={() => setSelectedTask(null)} className="text-gray-400 hover:text-gray-600">
+                            <button onClick={() => setSelectedTask(null)} className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-2 rounded-full transition-all">
                                 <X size={24} />
                             </button>
                         </div>
@@ -246,7 +249,7 @@ export const TasksPage: React.FC = () => {
                                         {!selectedTask.assigneeId && selectedTask.creatorId === currentUser?.id && (
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); handleStatusChange(selectedTask, 'finish_private'); }}
-                                                className="flex-1 bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 flex justify-center items-center gap-2"
+                                                className="btn-premium flex-1 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white px-4 py-2 rounded-lg flex justify-center items-center gap-2 shadow-md transition-all duration-200"
                                             >
                                                 <CheckCircle size={18} /> Concluir Tarefa
                                             </button>
@@ -256,7 +259,7 @@ export const TasksPage: React.FC = () => {
                                         {selectedTask.assigneeId === currentUser?.id && selectedTask.status === 'Pendente' && (
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); handleStatusChange(selectedTask, 'request_finish'); }}
-                                                className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex justify-center items-center gap-2"
+                                                className="btn-premium flex-1 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white px-4 py-2 rounded-lg flex justify-center items-center gap-2 shadow-md transition-all duration-200"
                                             >
                                                 <CheckCircle size={18} /> Solicitar Conclusão
                                             </button>
@@ -267,13 +270,13 @@ export const TasksPage: React.FC = () => {
                                             <>
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); handleStatusChange(selectedTask, 'approve'); }}
-                                                    className="flex-1 bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 flex justify-center items-center gap-2"
+                                                    className="btn-premium flex-1 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white px-4 py-2 rounded-lg flex justify-center items-center gap-2 shadow-md transition-all duration-200"
                                                 >
                                                     <ThumbsUp size={18} /> Aprovar
                                                 </button>
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); handleStatusChange(selectedTask, 'reject'); }}
-                                                    className="flex-1 bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 flex justify-center items-center gap-2"
+                                                    className="btn-premium flex-1 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white px-4 py-2 rounded-lg flex justify-center items-center gap-2 shadow-md transition-all duration-200"
                                                 >
                                                     <ThumbsDown size={18} /> Recusar
                                                 </button>
@@ -313,7 +316,7 @@ export const TasksPage: React.FC = () => {
                                 <div className="flex gap-2">
                                     <input
                                         type="text"
-                                        className="flex-1 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm bg-white text-gray-900"
+                                        className="input-premium flex-1 appearance-none block w-full px-3 py-2 rounded-md shadow-sm placeholder-gray-400 sm:text-sm bg-white text-gray-900"
                                         placeholder="Escreva um comentário..."
                                         value={commentText}
                                         onChange={e => setCommentText(e.target.value)}
@@ -322,7 +325,7 @@ export const TasksPage: React.FC = () => {
                                     <button
                                         onClick={handleAddComment}
                                         disabled={!commentText.trim()}
-                                        className="bg-primary-600 text-white p-2 rounded-md hover:bg-primary-700 disabled:opacity-50"
+                                        className="btn-premium bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white p-2 rounded-lg disabled:opacity-50 shadow-md transition-all duration-200"
                                     >
                                         <Send size={18} />
                                     </button>
@@ -335,8 +338,8 @@ export const TasksPage: React.FC = () => {
 
             {/* --- CREATE TASK MODAL --- */}
             {showCreateModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-lg p-6 w-full max-w-lg">
+                <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
+                    <div className="bg-white rounded-xl p-6 w-full max-w-lg shadow-2xl animate-scale-in">
                         <h3 className="text-lg font-bold mb-4 text-gray-900">Criar Tarefa</h3>
                         <div className="space-y-4">
                             <div>
@@ -391,8 +394,8 @@ export const TasksPage: React.FC = () => {
                             </div>
                         </div>
                         <div className="mt-6 flex justify-end space-x-3 pt-4 border-t border-gray-100">
-                            <button onClick={() => setShowCreateModal(false)} className="px-4 py-2 border rounded text-gray-700 hover:bg-gray-50 bg-white">Cancelar</button>
-                            <button onClick={handleSave} className="bg-primary-600 text-white px-4 py-2 rounded hover:bg-primary-700 shadow-sm">Criar Tarefa</button>
+                            <button onClick={() => setShowCreateModal(false)} className="px-6 py-2.5 border rounded-lg text-gray-700 hover:bg-gray-50 bg-white font-medium transition-colors">Cancelar</button>
+                            <button onClick={handleSave} className="btn-premium bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white px-8 py-2.5 rounded-lg shadow-md font-semibold transition-all duration-200">Criar Tarefa</button>
                         </div>
                     </div>
                 </div>
