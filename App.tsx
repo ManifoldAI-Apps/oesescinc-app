@@ -17,6 +17,7 @@ import { AttendancePage } from './pages/Attendance';
 import { ChecklistsPage } from './pages/Checklists';
 import { CertificatesPage } from './pages/Certificates';
 import { FirefightersPage } from './pages/Firefighters';
+import { DocumentsPage } from './pages/Documents';
 import { isSupabaseConfigured } from './services/supabase';
 import { AlertTriangle } from 'lucide-react';
 
@@ -98,6 +99,7 @@ const AppRoutes = () => {
       <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
       <Route path="/certificates" element={<ProtectedRoute><CertificatesPage /></ProtectedRoute>} />
       <Route path="/firefighters" element={<ProtectedRoute><FirefightersPage /></ProtectedRoute>} />
+      <Route path="/documents" element={<ProtectedRoute><DocumentsPage /></ProtectedRoute>} />
     </Routes>
   );
 };

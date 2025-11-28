@@ -37,6 +37,7 @@ export interface User {
     gloves: string;
     boots: string;
   };
+  photoUrl?: string;
   password?: string; // Simulating auth
 }
 
@@ -252,6 +253,27 @@ export interface SwapRequest {
   time: string;
   status: 'Pendente' | 'Aceito' | 'Recusado';
   timestamp: string;
+}
+
+// Document Management
+export interface Folder {
+  id: string;
+  name: string;
+  parentId?: string;
+  allowedRoles: string[]; // UserRole[]
+  createdBy: string;
+  createdAt: string;
+}
+
+export interface DocumentFile {
+  id: string;
+  folderId: string;
+  name: string;
+  url: string;
+  type: string;
+  size: string;
+  uploadedBy: string;
+  uploadedAt: string;
 }
 
 // Firefighters Management

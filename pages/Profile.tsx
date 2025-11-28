@@ -65,6 +65,26 @@ export const ProfilePage: React.FC = () => {
                             <input type="text" className={inputClass} value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
                         </div>
                         <div>
+                            <label className="block text-sm font-medium text-gray-700">Foto de Perfil (URL)</label>
+                            <div className="flex gap-4 items-center">
+                                <input
+                                    type="text"
+                                    className={inputClass}
+                                    value={formData.photoUrl || ''}
+                                    onChange={e => setFormData({ ...formData, photoUrl: e.target.value })}
+                                    placeholder="https://exemplo.com/foto.jpg"
+                                />
+                                {formData.photoUrl && (
+                                    <img
+                                        src={formData.photoUrl}
+                                        alt="Preview"
+                                        className="h-10 w-10 rounded-full object-cover border border-gray-200"
+                                        onError={(e) => (e.currentTarget.style.display = 'none')}
+                                    />
+                                )}
+                            </div>
+                        </div>
+                        <div>
                             <label className="block text-sm font-medium text-gray-700">CPF (Não editável)</label>
                             <input disabled type="text" className={`${inputClass} bg-gray-100 text-gray-500 cursor-not-allowed`} value={formData.cpf} />
                         </div>

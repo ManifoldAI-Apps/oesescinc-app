@@ -4,8 +4,6 @@ import { useStore } from '../context/AppStore';
 import { UserRole, Firefighter, Region, AirportClass, FirefighterLog, Base } from '../types';
 import { Plus, Search, X, Edit2, Trash2, Flame, Clock, AlertTriangle, FileText, Save, Download, MapPin } from 'lucide-react';
 import { ResponsiveContainer } from 'recharts';
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
 
 export const FirefightersPage: React.FC = () => {
     const { firefighters, firefighterLogs, addFirefighter, updateFirefighter, deleteFirefighter, addFirefighterLog, currentUser, bases, addBase, deleteBase } = useStore();
@@ -204,39 +202,29 @@ export const FirefightersPage: React.FC = () => {
         return { uniqueBases, data, monthTotals };
     }, [displayedFirefighters, yearFilter, regionFilter, validityType]);
 
-    const exportMatrixToPDF = () => {
-        const doc: any = new jsPDF('l', 'mm', 'a4');
-        doc.setFontSize(16);
-        doc.text(`Controle de Vencimentos (${validityType}) - ${yearFilter}`, 14, 15);
-
-        const head = [['BASE', ...monthNames.map(m => m.substring(0, 3)), 'TOTAL']];
-        const body = matrixData.uniqueBases.map(base => {
+    const exportMatrixToCSV = () => {
+        const headers = ["BASE", ...monthNames, "TOTAL"];
+        const rows = matrixData.uniqueBases.map(base => {
             const rowTotal = (Object.values(matrixData.data[base]) as number[]).reduce((a, b) => a + b, 0);
             const monthCells = monthNames.map((_, idx) => matrixData.data[base][idx] || 0);
             return [base, ...monthCells, rowTotal];
         });
 
         // Totals Row
-        const totalRow = ['TOTAL', ...matrixData.monthTotals, matrixData.monthTotals.reduce((a, b) => a + b, 0)];
-        body.push(totalRow);
+        const totalRow = ["TOTAL", ...matrixData.monthTotals, matrixData.monthTotals.reduce((a, b) => a + b, 0)];
+        rows.push(totalRow);
 
-        doc.autoTable({
-            startY: 25,
-            head: head,
-            body: body,
-            theme: 'grid',
-            headStyles: { fillColor: [22, 163, 74] }, // Green-600
-            styles: { fontSize: 9, cellPadding: 2 },
-            columnStyles: { 0: { fontStyle: 'bold' }, 13: { fontStyle: 'bold', fillColor: [240, 240, 240] } },
-            didParseCell: function (data: any) {
-                if (data.row.index === body.length - 1) {
-                    data.cell.styles.fontStyle = 'bold';
-                    data.cell.styles.fillColor = [220, 252, 231]; // Light Green
-                }
-            }
-        });
+        const csvContent = "data:text/csv;charset=utf-8,"
+            + headers.join(";") + "\n"
+            + rows.map(e => e.join(";")).join("\n");
 
-        doc.save(`Vencimentos_${validityType}_${yearFilter}.pdf`);
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `Vencimentos_${validityType}_${yearFilter}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     };
 
     const inputClass = "appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm bg-white text-gray-900";
@@ -446,10 +434,10 @@ export const FirefightersPage: React.FC = () => {
                             </button>
                         </div>
                         <button
-                            onClick={exportMatrixToPDF}
+                            onClick={exportMatrixToCSV}
                             className="flex items-center space-x-2 bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-50 text-sm"
                         >
-                            <Download size={16} /> <span>Exportar PDF</span>
+                            <Download size={16} /> <span>Exportar CSV</span>
                         </button>
                     </div>
 

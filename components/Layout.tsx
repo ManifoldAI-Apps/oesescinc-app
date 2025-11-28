@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useStore } from '../context/AppStore';
 import { UserRole } from '../types';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -34,6 +34,20 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
+  const notifRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
+        setNotifOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   if (!currentUser) return <>{children}</>;
 
@@ -101,6 +115,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
           )}
 
           <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 px-2 mt-6">Administrativo</div>
+          <SidebarItem icon={FileBadge} label="Documentos" path="/documents" active={isActive('/documents')} onClick={() => setMobileMenuOpen(false)} />
           <SidebarItem icon={ClipboardList} label="Checklists" path="/checklists" active={isActive('/checklists')} onClick={() => setMobileMenuOpen(false)} />
           <SidebarItem icon={CheckSquare} label="Tarefas" path="/tasks" active={isActive('/tasks')} onClick={() => setMobileMenuOpen(false)} />
           <SidebarItem icon={DollarSign} label="Financeiro" path="/finance" active={isActive('/finance')} onClick={() => setMobileMenuOpen(false)} />
@@ -142,65 +157,68 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
               <ThemeToggle />
 
               {/* Notifications */}
-              <button
-                onClick={() => setNotifOpen(!notifOpen)}
-                className="p-2 text-gray-400 hover:text-gray-600 relative"
-              >
-                <Bell size={22} />
-                {unreadCount > 0 && (
-                  <span className="absolute top-1 right-1 h-2.5 w-2.5 bg-red-500 rounded-full ring-2 ring-white"></span>
-                )}
-              </button>
+              {/* Notifications Wrapper */}
+              <div className="relative" ref={notifRef}>
+                <button
+                  onClick={() => setNotifOpen(!notifOpen)}
+                  className="p-2 text-gray-400 hover:text-gray-600 relative"
+                >
+                  <Bell size={22} />
+                  {unreadCount > 0 && (
+                    <span className="absolute top-1 right-1 h-2.5 w-2.5 bg-red-500 rounded-full ring-2 ring-white"></span>
+                  )}
+                </button>
 
-              {notifOpen && (
-                <div className="absolute right-0 mt-2 w-80 bg-white shadow-lg rounded-lg border border-gray-200 z-50 overflow-hidden">
-                  <div className="p-3 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-                    <span className="font-bold text-gray-700 text-sm">Notificações</span>
-                    <span className="text-xs text-gray-400">{unreadCount} não lidas</span>
-                  </div>
-                  <div className="max-h-80 overflow-y-auto">
-                    {myNotifications.length === 0 && (
-                      <div className="p-4 text-center text-sm text-gray-400 italic">Sem notificações recentes.</div>
-                    )}
-                    {myNotifications.map(notif => (
-                      <div key={notif.id} className={`p-3 border-b border-gray-50 hover:bg-gray-50 ${!notif.read ? 'bg-blue-50' : ''}`}>
-                        <div className="flex justify-between items-start mb-1">
-                          <h4 className="text-sm font-semibold text-gray-800">{notif.title}</h4>
-                          <span className="text-[10px] text-gray-400">{new Date(notif.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                        </div>
-                        <p className="text-xs text-gray-600 mb-2">{notif.message}</p>
-
-                        {/* Action Buttons for Swap Requests */}
-                        {notif.type === 'swap_request' && notif.metadata?.swapRequestId && !notif.read && (
-                          <div className="flex gap-2 mt-2">
-                            <button
-                              onClick={() => resolveSwapRequest(notif.metadata!.swapRequestId!, true)}
-                              className="flex-1 bg-green-600 text-white text-xs py-1 rounded hover:bg-green-700 flex justify-center items-center gap-1"
-                            >
-                              <Check size={12} /> Aceitar
-                            </button>
-                            <button
-                              onClick={() => resolveSwapRequest(notif.metadata!.swapRequestId!, false)}
-                              className="flex-1 bg-red-600 text-white text-xs py-1 rounded hover:bg-red-700 flex justify-center items-center gap-1"
-                            >
-                              <X size={12} /> Recusar
-                            </button>
+                {notifOpen && (
+                  <div className="absolute right-0 mt-2 w-80 bg-white shadow-lg rounded-lg border border-gray-200 z-50 overflow-hidden">
+                    <div className="p-3 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                      <span className="font-bold text-gray-700 text-sm">Notificações</span>
+                      <span className="text-xs text-gray-400">{unreadCount} não lidas</span>
+                    </div>
+                    <div className="max-h-80 overflow-y-auto">
+                      {myNotifications.length === 0 && (
+                        <div className="p-4 text-center text-sm text-gray-400 italic">Sem notificações recentes.</div>
+                      )}
+                      {myNotifications.map(notif => (
+                        <div key={notif.id} className={`p-3 border-b border-gray-50 hover:bg-gray-50 ${!notif.read ? 'bg-blue-50' : ''}`}>
+                          <div className="flex justify-between items-start mb-1">
+                            <h4 className="text-sm font-semibold text-gray-800">{notif.title}</h4>
+                            <span className="text-[10px] text-gray-400">{new Date(notif.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                           </div>
-                        )}
+                          <p className="text-xs text-gray-600 mb-2">{notif.message}</p>
 
-                        {!notif.read && notif.type !== 'swap_request' && (
-                          <button
-                            onClick={() => markNotificationAsRead(notif.id)}
-                            className="text-[10px] text-primary-600 hover:underline mt-1"
-                          >
-                            Marcar como lida
-                          </button>
-                        )}
-                      </div>
-                    ))}
+                          {/* Action Buttons for Swap Requests */}
+                          {notif.type === 'swap_request' && notif.metadata?.swapRequestId && !notif.read && (
+                            <div className="flex gap-2 mt-2">
+                              <button
+                                onClick={() => resolveSwapRequest(notif.metadata!.swapRequestId!, true)}
+                                className="flex-1 bg-green-600 text-white text-xs py-1 rounded hover:bg-green-700 flex justify-center items-center gap-1"
+                              >
+                                <Check size={12} /> Aceitar
+                              </button>
+                              <button
+                                onClick={() => resolveSwapRequest(notif.metadata!.swapRequestId!, false)}
+                                className="flex-1 bg-red-600 text-white text-xs py-1 rounded hover:bg-red-700 flex justify-center items-center gap-1"
+                              >
+                                <X size={12} /> Recusar
+                              </button>
+                            </div>
+                          )}
+
+                          {!notif.read && notif.type !== 'swap_request' && (
+                            <button
+                              onClick={() => markNotificationAsRead(notif.id)}
+                              className="text-[10px] text-primary-600 hover:underline mt-1"
+                            >
+                              Marcar como lida
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
 
             <div className="text-right hidden sm:block">
