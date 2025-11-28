@@ -71,9 +71,12 @@ export const CertificatesPage: React.FC = () => {
     };
 
     return (
-        <div className="space-y-6">
-            <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold text-gray-900">Consulta de Certificados</h1>
+        <div className="space-y-6 animate-fade-in">
+            <div className="flex justify-between items-center animate-slide-down">
+                <div>
+                    <h1 className="text-3xl font-bold text-gray-900">Consulta de Certificados</h1>
+                    <p className="text-gray-500 mt-1">Gerencie e emita certificados</p>
+                </div>
             </div>
 
             {/* Search and Filters */}
@@ -154,7 +157,7 @@ export const CertificatesPage: React.FC = () => {
                                 </div>
                                 <button
                                     onClick={() => handlePrint(cert.id)}
-                                    className="w-full md:w-auto bg-primary-600 hover:bg-primary-700 text-white px-6 py-2 rounded-lg shadow-sm flex items-center justify-center space-x-2 transition-colors"
+                                    className="btn-premium w-full md:w-auto bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white px-6 py-2 rounded-lg shadow-md flex items-center justify-center space-x-2 transition-all duration-200"
                                 >
                                     <Printer size={18} />
                                     <span>Emitir</span>

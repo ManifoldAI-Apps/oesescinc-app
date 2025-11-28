@@ -243,16 +243,19 @@ export const FirefightersPage: React.FC = () => {
     const monthNames = ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"];
 
     return (
-        <div className="space-y-6">
-            <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold text-gray-900">Gestão de Bombeiros</h1>
+        <div className="space-y-6 animate-fade-in">
+            <div className="flex justify-between items-center animate-slide-down">
+                <div>
+                    <h1 className="text-3xl font-bold text-gray-900">Gestão de Bombeiros</h1>
+                    <p className="text-gray-500 mt-1">Gerencie bombeiros e validades</p>
+                </div>
                 {canEdit && activeTab === 'list' && (
                     <button
                         onClick={() => { resetForm(); setShowModal(true); }}
-                        className="flex items-center space-x-2 bg-primary-600 text-white px-4 py-2 rounded-md hover:bg-primary-700 transition"
+                        className="btn-premium flex items-center space-x-2 bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white px-6 py-3 rounded-lg shadow-md transition-all duration-200"
                     >
                         <Plus size={20} />
-                        <span>Novo Bombeiro</span>
+                        <span className="font-semibold">Novo Bombeiro</span>
                     </button>
                 )}
             </div>
@@ -683,7 +686,7 @@ export const FirefightersPage: React.FC = () => {
 
                             <div className="flex justify-end pt-4 border-t border-gray-100">
                                 <button type="button" onClick={() => setShowModal(false)} className="mr-3 px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">Cancelar</button>
-                                <button type="submit" className="flex items-center space-x-2 bg-primary-600 text-white px-6 py-2 rounded-md hover:bg-primary-700 shadow-sm">
+                                <button type="submit" className="btn-premium flex items-center space-x-2 bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white px-8 py-2.5 rounded-lg shadow-md font-semibold transition-all duration-200">
                                     <Save size={18} />
                                     <span>Salvar</span>
                                 </button>
