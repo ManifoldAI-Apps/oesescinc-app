@@ -224,9 +224,12 @@ export const AttendancePage: React.FC = () => {
     const inputClass = "appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm bg-white text-gray-900";
 
     return (
-        <div className="space-y-6">
-            <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold text-gray-900">Controle de Frequência</h1>
+        <div className="space-y-6 animate-fade-in">
+            <div className="flex justify-between items-center animate-slide-down">
+                <div>
+                    <h1 className="text-3xl font-bold text-gray-900">Controle de Frequência</h1>
+                    <p className="text-gray-500 mt-1">Gerencie presenças e ausências</p>
+                </div>
             </div>
 
             <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
@@ -255,7 +258,7 @@ export const AttendancePage: React.FC = () => {
 
                             <button
                                 onClick={handleStartAttendance}
-                                className="bg-primary-600 text-white px-4 py-2 rounded-md hover:bg-primary-700 transition flex items-center justify-center space-x-2"
+                                className="btn-premium bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white px-4 py-2 rounded-lg transition-all duration-200 flex items-center justify-center space-x-2 shadow-md"
                             >
                                 <Calendar size={18} />
                                 <span>Registrar Frequência</span>
@@ -352,7 +355,7 @@ export const AttendancePage: React.FC = () => {
                         <button onClick={() => setViewMode('history')} className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-100">
                             Cancelar
                         </button>
-                        <button onClick={saveAttendance} className="flex items-center space-x-2 bg-primary-600 text-white px-6 py-2 rounded-md hover:bg-primary-700 shadow-sm">
+                        <button onClick={saveAttendance} className="btn-premium flex items-center space-x-2 bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white px-8 py-2.5 rounded-lg shadow-md font-semibold transition-all duration-200">
                             <Save size={18} />
                             <span>Salvar Lista</span>
                         </button>

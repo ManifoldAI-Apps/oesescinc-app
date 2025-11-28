@@ -229,9 +229,12 @@ export const EvaluationsPage: React.FC = () => {
         .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
     return (
-        <div className="space-y-6">
-            <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold text-gray-900">Avaliações e Notas</h1>
+        <div className="space-y-6 animate-fade-in">
+            <div className="flex justify-between items-center animate-slide-down">
+                <div>
+                    <h1 className="text-3xl font-bold text-gray-900">Avaliações e Notas</h1>
+                    <p className="text-gray-500 mt-1">Gerencie notas e boletins</p>
+                </div>
             </div>
 
             <div className="bg-white p-4 rounded-lg shadow-sm flex flex-col md:flex-row justify-between items-end md:items-center gap-4 border border-gray-100">
@@ -273,7 +276,7 @@ export const EvaluationsPage: React.FC = () => {
                                 </button>
                                 <button
                                     onClick={handleSaveChanges}
-                                    className="flex items-center space-x-2 bg-primary-600 text-white px-4 py-2 rounded-md hover:bg-primary-700 transition shadow-sm"
+                                    className="btn-premium flex items-center space-x-2 bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white px-6 py-2.5 rounded-lg shadow-md font-semibold transition-all duration-200"
                                 >
                                     <Save size={18} />
                                     <span>Salvar Alterações</span>

@@ -138,9 +138,12 @@ export const ChecklistsPage: React.FC = () => {
     const inputClass = "appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm bg-white text-gray-900";
 
     return (
-        <div className="space-y-6">
-            <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold text-gray-900">Checklists Operacionais</h1>
+        <div className="space-y-6 animate-fade-in">
+            <div className="flex justify-between items-center animate-slide-down">
+                <div>
+                    <h1 className="text-3xl font-bold text-gray-900">Checklists Operacionais</h1>
+                    <p className="text-gray-500 mt-1">Gerencie verificações e inspeções</p>
+                </div>
             </div>
 
             {/* Tabs */}
@@ -298,7 +301,7 @@ export const ChecklistsPage: React.FC = () => {
                             <div className="flex justify-end pt-4">
                                 <button
                                     onClick={handleSubmit}
-                                    className="bg-primary-600 text-white px-6 py-3 rounded-md hover:bg-primary-700 shadow-sm font-medium"
+                                    className="btn-premium bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white px-8 py-3 rounded-lg shadow-md font-semibold transition-all duration-200"
                                 >
                                     Salvar Checklist
                                 </button>
