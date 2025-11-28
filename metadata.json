@@ -1,0 +1,5 @@
+{
+  "name": "Copy of OE-SESCINC Med+ Group",
+  "description": "Enterprise management system for Emergency Training Organizations. Handles courses, classes, students, tasks, and instructor finance with role-based access control.",
+  "requestFramePermissions": []
+}
