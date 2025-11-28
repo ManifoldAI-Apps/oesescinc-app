@@ -181,19 +181,22 @@ export const StudentsPage: React.FC = () => {
     const inputClass = "appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm bg-white text-gray-900";
 
     return (
-        <div className="space-y-6">
-            <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold text-gray-900">Alunos</h1>
+        <div className="space-y-6 animate-fade-in">
+            <div className="flex justify-between items-center animate-slide-down">
+                <div>
+                    <h1 className="text-3xl font-bold text-gray-900">Alunos</h1>
+                    <p className="text-gray-500 mt-1">Gerencie os alunos e suas matrículas</p>
+                </div>
                 <button
                     onClick={() => setShowModal(true)}
-                    className="flex items-center space-x-2 bg-primary-600 text-white px-4 py-2 rounded-md hover:bg-primary-700 transition"
+                    className="btn-premium flex items-center space-x-2 bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white px-6 py-3 rounded-lg shadow-md transition-all duration-200"
                 >
                     <Plus size={20} />
-                    <span>Novo Aluno</span>
+                    <span className="font-semibold">Novo Aluno</span>
                 </button>
             </div>
 
-            <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+            <div className="card-premium overflow-hidden animate-slide-up">
                 <div className="p-4 border-b border-gray-100 flex flex-col md:flex-row gap-4 justify-between">
                     <div className="relative flex-1 max-w-md">
                         <input
@@ -201,7 +204,7 @@ export const StudentsPage: React.FC = () => {
                             placeholder="Buscar por nome, CPF ou Matrícula..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm bg-white text-gray-900"
+                            className="input-premium appearance-none block w-full px-3 py-2 rounded-md shadow-sm placeholder-gray-400 sm:text-sm bg-white text-gray-900"
                         />
                     </div>
 
@@ -248,12 +251,12 @@ export const StudentsPage: React.FC = () => {
                                 else if (s.enrollmentStatus === 'Pendente') statusColor = 'bg-yellow-100 text-yellow-800';
 
                                 return (
-                                    <tr key={s.id} className="hover:bg-gray-50">
+                                    <tr key={s.id} className="hover:bg-gray-50 transition-colors group">
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{s.matricula}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{s.name}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{s.className}</td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColor}`}>
+                                            <span className={`badge px-2 inline-flex text-xs leading-5 font-semibold rounded-full transition-transform group-hover:scale-110 ${statusColor}`}>
                                                 {s.enrollmentStatus}
                                             </span>
                                         </td>
@@ -273,7 +276,7 @@ export const StudentsPage: React.FC = () => {
                                         </td>
 
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium border-l border-gray-100">
-                                            <button onClick={() => handleEdit(s)} className="text-primary-600 hover:text-primary-900">
+                                            <button onClick={() => handleEdit(s)} className="text-primary-600 hover:text-primary-900 hover:scale-110 transition-all duration-200">
                                                 <Pencil size={18} />
                                             </button>
                                         </td>
@@ -286,11 +289,11 @@ export const StudentsPage: React.FC = () => {
             </div>
 
             {showModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+                <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
+                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto animate-scale-in">
                         <div className="p-6 border-b border-gray-100 flex justify-between items-center">
                             <h3 className="text-lg font-bold text-gray-900">{editingId ? 'Editar Aluno' : 'Cadastro de Aluno'}</h3>
-                            <button onClick={handleCloseModal}><X size={24} className="text-gray-400" /></button>
+                            <button onClick={handleCloseModal} className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-2 rounded-full transition-all"><X size={24} /></button>
                         </div>
                         <form onSubmit={handleSave} className="p-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -381,9 +384,9 @@ export const StudentsPage: React.FC = () => {
                                 </div>
                             </div>
 
-                            <div className="flex justify-end mt-6 pt-4 border-t border-gray-100">
-                                <button type="button" onClick={handleCloseModal} className="mr-3 px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">Cancelar</button>
-                                <button type="submit" className="bg-primary-600 text-white px-6 py-2 rounded hover:bg-primary-700">Salvar Aluno</button>
+                            <div className="flex justify-end mt-6 pt-4 border-t border-gray-100 space-x-3">
+                                <button type="button" onClick={handleCloseModal} className="px-6 py-2.5 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 font-medium transition-colors">Cancelar</button>
+                                <button type="submit" className="btn-premium bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white px-8 py-2.5 rounded-lg font-semibold shadow-md transition-all duration-200">Salvar Aluno</button>
                             </div>
                         </form>
                     </div>
