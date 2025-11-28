@@ -47,8 +47,11 @@ export const ProfilePage: React.FC = () => {
     const inputClass = "appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm bg-white text-gray-900";
 
     return (
-        <div className="space-y-6 max-w-4xl mx-auto">
-            <h1 className="text-2xl font-bold text-gray-900">Meu Perfil</h1>
+        <div className="space-y-6 max-w-4xl mx-auto animate-fade-in">
+            <div className="animate-slide-down">
+                <h1 className="text-3xl font-bold text-gray-900">Meu Perfil</h1>
+                <p className="text-gray-500 mt-1">Gerencie suas informações pessoais</p>
+            </div>
 
             <div className="bg-white shadow-sm rounded-lg border border-gray-100 overflow-hidden">
                 <div className="p-6 border-b border-gray-100 flex items-center space-x-3">
@@ -138,7 +141,7 @@ export const ProfilePage: React.FC = () => {
                     </div>
 
                     <div className="flex justify-end pt-4">
-                        <button type="submit" className="flex items-center space-x-2 bg-primary-600 text-white px-6 py-2 rounded-md hover:bg-primary-700 transition">
+                        <button type="submit" className="btn-premium flex items-center space-x-2 bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white px-8 py-2.5 rounded-lg shadow-md font-semibold transition-all duration-200">
                             <Save size={20} />
                             <span>Salvar Alterações</span>
                         </button>
@@ -182,7 +185,7 @@ export const ProfilePage: React.FC = () => {
                     )}
 
                     <div className="flex justify-end pt-4">
-                        <button type="submit" className="flex items-center space-x-2 bg-gray-800 text-white px-6 py-2 rounded-md hover:bg-gray-900 transition">
+                        <button type="submit" className="btn-premium flex items-center space-x-2 bg-gradient-to-r from-gray-800 to-gray-700 hover:from-gray-900 hover:to-gray-800 text-white px-8 py-2.5 rounded-lg shadow-md font-semibold transition-all duration-200">
                             <Lock size={18} />
                             <span>Atualizar Senha</span>
                         </button>

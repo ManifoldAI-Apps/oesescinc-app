@@ -226,15 +226,18 @@ export const FinancePage: React.FC = () => {
     const inputClass = "appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm bg-white text-gray-900";
 
     return (
-        <div className="space-y-8">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <h1 className="text-2xl font-bold text-gray-900">Painel Financeiro</h1>
+        <div className="space-y-8 animate-fade-in">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 animate-slide-down">
+                <div>
+                    <h1 className="text-3xl font-bold text-gray-900">Painel Financeiro</h1>
+                    <p className="text-gray-500 mt-1">Gerencie pagamentos e acompanhe finanças</p>
+                </div>
             </div>
 
             {/* 1. Global Metrics Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {/* Hours */}
-                <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 relative overflow-hidden">
+                <div className="card-premium stagger-item p-6 relative overflow-hidden">
                     <div className="flex items-center justify-between mb-2 relative z-10">
                         <p className="text-gray-500 text-sm font-medium">Horas Totais (Filtrado)</p>
                         <Clock size={18} className="text-blue-500" />
@@ -243,7 +246,7 @@ export const FinancePage: React.FC = () => {
                 </div>
 
                 {/* Pending Value */}
-                <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+                <div className="card-premium stagger-item p-6">
                     <div className="flex items-center justify-between mb-2">
                         <p className="text-gray-500 text-sm font-medium">A Pagar (Pendente)</p>
                         <AlertCircle size={18} className="text-orange-500" />
@@ -253,7 +256,7 @@ export const FinancePage: React.FC = () => {
                 </div>
 
                 {/* Paid Value */}
-                <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+                <div className="card-premium stagger-item p-6">
                     <div className="flex items-center justify-between mb-2">
                         <p className="text-gray-500 text-sm font-medium">Liquidado (Pago)</p>
                         <Check size={18} className="text-green-500" />
@@ -263,7 +266,7 @@ export const FinancePage: React.FC = () => {
                 </div>
 
                 {/* Total Value */}
-                <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+                <div className="card-premium stagger-item p-6">
                     <div className="flex items-center justify-between mb-2">
                         <p className="text-gray-500 text-sm font-medium">Total Geral</p>
                         <DollarSign size={18} className="text-gray-400" />
@@ -389,7 +392,7 @@ export const FinancePage: React.FC = () => {
                         {canManagePayments && selectedLogs.length > 0 && (
                             <button
                                 onClick={handleRegisterPayment}
-                                className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition flex items-center gap-2 text-sm shadow-sm"
+                                className="btn-premium bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white px-4 py-2 rounded-lg transition-all duration-200 flex items-center gap-2 text-sm shadow-md"
                             >
                                 <DollarSign size={16} />
                                 Pagar {selectedLogs.length} item(ns)

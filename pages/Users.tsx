@@ -57,16 +57,19 @@ export const UsersPage: React.FC = () => {
   const inputClass = "appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm bg-white text-gray-900";
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h1 className="text-2xl font-bold text-gray-900">Gerenciamento de Usuários</h1>
+    <div className="space-y-6 animate-fade-in">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 animate-slide-down">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Gerenciamento de Usuários</h1>
+          <p className="text-gray-500 mt-1">Gerencie usuários e permissões</p>
+        </div>
         {canCreateUsers && (
           <button
             onClick={() => setShowModal(true)}
-            className="flex items-center space-x-2 bg-primary-600 text-white px-4 py-2 rounded-md hover:bg-primary-700 transition"
+            className="btn-premium flex items-center space-x-2 bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white px-6 py-3 rounded-lg shadow-md transition-all duration-200"
           >
             <Plus size={20} />
-            <span>Novo Usuário</span>
+            <span className="font-semibold">Novo Usuário</span>
           </button>
         )}
       </div>
