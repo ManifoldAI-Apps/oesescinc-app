@@ -171,150 +171,154 @@ export const CoursesPage: React.FC = () => {
             </div>
 
             {isCreating && (
-                <div className="bg-white p-6 rounded-lg shadow-lg border border-gray-100 mb-8 animate-fade-in relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-1 h-full bg-primary-500"></div>
-                    <div className="flex justify-between items-center mb-6 border-b border-gray-100 pb-4">
-                        <h3 className="text-xl font-bold text-gray-900 flex items-center">
-                            {editingId ? <Pencil size={20} className="mr-2 text-primary-500" /> : <Plus size={20} className="mr-2 text-primary-500" />}
-                            {editingId ? 'Editar Curso' : 'Cadastrar Novo Curso'}
-                        </h3>
-                        <button onClick={resetForm} className="text-gray-400 hover:text-gray-600 transition-colors bg-gray-50 p-1 rounded-full hover:bg-gray-100">
-                            <X size={20} />
-                        </button>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Curso</label>
-                            <select
-                                className={inputClass}
-                                value={courseForm.type}
-                                onChange={e => setCourseForm({ ...courseForm, type: e.target.value as CourseType })}
-                            >
-                                {Object.values(CourseType).map(t => <option key={t} value={t}>{t}</option>)}
-                            </select>
+                <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
+                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto animate-scale-in">
+                        <div className="p-6 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white z-10">
+                            <h3 className="text-xl font-bold text-gray-900 flex items-center">
+                                {editingId ? <Pencil size={20} className="mr-2 text-primary-500" /> : <Plus size={20} className="mr-2 text-primary-500" />}
+                                {editingId ? 'Editar Curso' : 'Cadastrar Novo Curso'}
+                            </h3>
+                            <button onClick={resetForm} className="text-gray-400 hover:text-gray-600 transition-colors">
+                                <X size={24} />
+                            </button>
                         </div>
 
-                        {courseForm.type === CourseType.CUSTOM && (
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Nome do Curso Personalizado</label>
-                                <input
-                                    placeholder="Digite o nome do curso..."
-                                    className={inputClass}
-                                    value={customName}
-                                    onChange={e => setCustomName(e.target.value)}
-                                />
-                            </div>
-                        )}
-                    </div>
+                        <div className="p-6">
 
-                    <div className="bg-gray-50 p-4 rounded mb-4 border border-gray-200">
-                        <h4 className="text-sm font-bold text-gray-700 mb-3 flex items-center">
-                            <Plus size={16} className="mr-1" /> Adicionar Matérias
-                        </h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Curso</label>
+                                    <select
+                                        className={inputClass}
+                                        value={courseForm.type}
+                                        onChange={e => setCourseForm({ ...courseForm, type: e.target.value as CourseType })}
+                                    >
+                                        {Object.values(CourseType).map(t => <option key={t} value={t}>{t}</option>)}
+                                    </select>
+                                </div>
 
-                        {/* Subject Input Row: Module -> Name -> Hours -> Modality */}
-                        <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
-                            <div className="md:col-span-3">
-                                <label className="text-xs text-gray-500 font-medium">Módulo</label>
-                                <input
-                                    placeholder="Ex: Módulo 1"
-                                    className={inputClass}
-                                    value={tempSubject.module}
-                                    onChange={e => setTempSubject({ ...tempSubject, module: e.target.value })}
-                                />
+                                {courseForm.type === CourseType.CUSTOM && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Nome do Curso Personalizado</label>
+                                        <input
+                                            placeholder="Digite o nome do curso..."
+                                            className={inputClass}
+                                            value={customName}
+                                            onChange={e => setCustomName(e.target.value)}
+                                        />
+                                    </div>
+                                )}
                             </div>
-                            <div className="md:col-span-4">
-                                <label className="text-xs text-gray-500 font-medium">Matéria</label>
-                                <input
-                                    placeholder="Nome da Matéria"
-                                    className={inputClass}
-                                    value={tempSubject.name}
-                                    onChange={e => setTempSubject({ ...tempSubject, name: e.target.value })}
-                                />
+
+                            <div className="bg-gray-50 p-4 rounded mb-4 border border-gray-200">
+                                <h4 className="text-sm font-bold text-gray-700 mb-3 flex items-center">
+                                    <Plus size={16} className="mr-1" /> Adicionar Matérias
+                                </h4>
+
+                                {/* Subject Input Row: Module -> Name -> Hours -> Modality */}
+                                <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
+                                    <div className="md:col-span-3">
+                                        <label className="text-xs text-gray-500 font-medium">Módulo</label>
+                                        <input
+                                            placeholder="Ex: Módulo 1"
+                                            className={inputClass}
+                                            value={tempSubject.module}
+                                            onChange={e => setTempSubject({ ...tempSubject, module: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="md:col-span-4">
+                                        <label className="text-xs text-gray-500 font-medium">Matéria</label>
+                                        <input
+                                            placeholder="Nome da Matéria"
+                                            className={inputClass}
+                                            value={tempSubject.name}
+                                            onChange={e => setTempSubject({ ...tempSubject, name: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="md:col-span-2">
+                                        <label className="text-xs text-gray-500 font-medium">Carga Horária</label>
+                                        <input
+                                            type="number"
+                                            className={inputClass}
+                                            value={tempSubject.hours}
+                                            onChange={e => setTempSubject({ ...tempSubject, hours: parseInt(e.target.value) })}
+                                        />
+                                    </div>
+                                    <div className="md:col-span-2">
+                                        <label className="text-xs text-gray-500 font-medium">Modalidade</label>
+                                        <select
+                                            className={inputClass}
+                                            value={tempSubject.modality}
+                                            onChange={e => setTempSubject({ ...tempSubject, modality: e.target.value as any })}
+                                        >
+                                            <option>Teórica</option>
+                                            <option>Prática</option>
+                                        </select>
+                                    </div>
+                                    <div className="md:col-span-1">
+                                        <button
+                                            onClick={editingSubjectId ? handleUpdateSubject : handleAddSubject}
+                                            className={`w-full flex justify-center items-center text-white rounded-md h-[38px] transition-colors ${editingSubjectId ? 'bg-blue-600 hover:bg-blue-700' : 'bg-green-600 hover:bg-green-700'
+                                                }`}
+                                            title={editingSubjectId ? "Atualizar Matéria" : "Adicionar Matéria"}
+                                        >
+                                            {editingSubjectId ? <Save size={20} /> : <Plus size={20} />}
+                                        </button>
+                                    </div>
+                                </div>
+
+
+                                {/* List of Subjects with Scrollbar */}
+                                <div className="mt-4">
+                                    <h4 className="text-sm font-semibold text-gray-700 mb-2 pb-2 border-b border-gray-200">
+                                        Matérias Cadastradas ({courseForm.subjects?.length || 0})
+                                    </h4>
+                                    <div className="max-h-64 overflow-y-auto space-y-2 pr-2">
+                                        {courseForm.subjects?.length === 0 && (
+                                            <p className="text-sm text-gray-500 italic text-center py-2">Nenhuma matéria adicionada ainda.</p>
+                                        )}
+                                        {courseForm.subjects?.map((sub, index) => (
+                                            <div key={sub.id || index} className="flex justify-between items-center text-sm bg-white p-3 border rounded shadow-sm hover:shadow-md transition-shadow">
+                                                <div className="flex-1 flex flex-col">
+                                                    <span className="text-xs text-gray-500 font-bold">{sub.module}</span>
+                                                    <span className="font-semibold text-gray-900">{sub.name}</span>
+                                                </div>
+                                                <div className="flex items-center space-x-2">
+                                                    <span className={`px-2 py-0.5 rounded text-xs ${sub.modality === 'Teórica' ? 'bg-blue-100 text-blue-800' : 'bg-orange-100 text-orange-800'}`}>
+                                                        {sub.modality}
+                                                    </span>
+                                                    <span className="font-bold text-gray-600 w-12 text-right">{sub.hours}h</span>
+                                                    <button
+                                                        onClick={() => handleEditSubject(sub)}
+                                                        className="text-blue-600 hover:text-blue-800 p-1"
+                                                        title="Editar Matéria"
+                                                    >
+                                                        <Pencil size={16} />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleRemoveSubject(sub.id)}
+                                                        className="text-red-500 hover:text-red-700 p-1"
+                                                        title="Remover Matéria"
+                                                    >
+                                                        <Trash2 size={16} />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
                             </div>
-                            <div className="md:col-span-2">
-                                <label className="text-xs text-gray-500 font-medium">Carga Horária</label>
-                                <input
-                                    type="number"
-                                    className={inputClass}
-                                    value={tempSubject.hours}
-                                    onChange={e => setTempSubject({ ...tempSubject, hours: parseInt(e.target.value) })}
-                                />
-                            </div>
-                            <div className="md:col-span-2">
-                                <label className="text-xs text-gray-500 font-medium">Modalidade</label>
-                                <select
-                                    className={inputClass}
-                                    value={tempSubject.modality}
-                                    onChange={e => setTempSubject({ ...tempSubject, modality: e.target.value as any })}
-                                >
-                                    <option>Teórica</option>
-                                    <option>Prática</option>
-                                </select>
-                            </div>
-                            <div className="md:col-span-1">
-                                <button
-                                    onClick={editingSubjectId ? handleUpdateSubject : handleAddSubject}
-                                    className={`w-full flex justify-center items-center text-white rounded-md h-[38px] transition-colors ${editingSubjectId ? 'bg-blue-600 hover:bg-blue-700' : 'bg-green-600 hover:bg-green-700'
-                                        }`}
-                                    title={editingSubjectId ? "Atualizar Matéria" : "Adicionar Matéria"}
-                                >
-                                    {editingSubjectId ? <Save size={20} /> : <Plus size={20} />}
+
+                            <div className="flex justify-end space-x-3 pt-2">
+                                <button onClick={resetForm} className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 bg-white">
+                                    Cancelar
+                                </button>
+                                <button onClick={handleSaveCourse} className="btn-premium flex items-center space-x-2 px-6 py-2.5 bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white rounded-lg shadow-md transition-all duration-200">
+                                    <Save size={18} />
+                                    <span className="font-semibold">{editingId ? 'Salvar Alterações' : 'Salvar Curso'}</span>
                                 </button>
                             </div>
                         </div>
-
-
-                        {/* List of Subjects with Scrollbar */}
-                        <div className="mt-4">
-                            <h4 className="text-sm font-semibold text-gray-700 mb-2 pb-2 border-b border-gray-200">
-                                Matérias Cadastradas ({courseForm.subjects?.length || 0})
-                            </h4>
-                            <div className="max-h-64 overflow-y-auto space-y-2 pr-2">
-                                {courseForm.subjects?.length === 0 && (
-                                    <p className="text-sm text-gray-500 italic text-center py-2">Nenhuma matéria adicionada ainda.</p>
-                                )}
-                                {courseForm.subjects?.map((sub, index) => (
-                                    <div key={sub.id || index} className="flex justify-between items-center text-sm bg-white p-3 border rounded shadow-sm hover:shadow-md transition-shadow">
-                                        <div className="flex-1 flex flex-col">
-                                            <span className="text-xs text-gray-500 font-bold">{sub.module}</span>
-                                            <span className="font-semibold text-gray-900">{sub.name}</span>
-                                        </div>
-                                        <div className="flex items-center space-x-2">
-                                            <span className={`px-2 py-0.5 rounded text-xs ${sub.modality === 'Teórica' ? 'bg-blue-100 text-blue-800' : 'bg-orange-100 text-orange-800'}`}>
-                                                {sub.modality}
-                                            </span>
-                                            <span className="font-bold text-gray-600 w-12 text-right">{sub.hours}h</span>
-                                            <button
-                                                onClick={() => handleEditSubject(sub)}
-                                                className="text-blue-600 hover:text-blue-800 p-1"
-                                                title="Editar Matéria"
-                                            >
-                                                <Pencil size={16} />
-                                            </button>
-                                            <button
-                                                onClick={() => handleRemoveSubject(sub.id)}
-                                                className="text-red-500 hover:text-red-700 p-1"
-                                                title="Remover Matéria"
-                                            >
-                                                <Trash2 size={16} />
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="flex justify-end space-x-3 pt-2">
-                        <button onClick={resetForm} className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 bg-white">
-                            Cancelar
-                        </button>
-                        <button onClick={handleSaveCourse} className="flex items-center space-x-2 px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 shadow-sm">
-                            <Save size={18} />
-                            <span>{editingId ? 'Salvar Alterações' : 'Salvar Curso'}</span>
-                        </button>
                     </div>
                 </div>
             )}
