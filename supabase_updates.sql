@@ -141,3 +141,22 @@ create policy "Public access" on public.folders for all using (true);
 
 alter table public.documents enable row level security;
 create policy "Public access" on public.documents for all using (true);
+
+-- Setup/Teardown Assignments
+create table if not exists public.setup_teardown_assignments (
+  id uuid primary key default uuid_generate_v4(),
+  class_id uuid references public.classes(id),
+  class_name text,
+  type text check (type in ('Montagem', 'Desmontagem')),
+  instructor_id uuid references public.users(id),
+  instructor_name text,
+  days integer,
+  rate numeric default 350,
+  total_value numeric,
+  date date,
+  notes text,
+  created_at timestamp with time zone default now()
+);
+
+alter table public.setup_teardown_assignments enable row level security;
+create policy "Public access" on public.setup_teardown_assignments for all using (true);

@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { User, Course, ClassGroup, Student, Task, UserRole, AttendanceLog, GradeLog, PaymentRecord, ChecklistTemplate, ChecklistLog, Notification, SwapRequest, Firefighter, FirefighterLog, Base, Folder, DocumentFile } from '../types';
+import { User, Course, ClassGroup, Student, Task, UserRole, AttendanceLog, GradeLog, PaymentRecord, ChecklistTemplate, ChecklistLog, Notification, SwapRequest, Firefighter, FirefighterLog, Base, Folder, DocumentFile, SetupTeardownAssignment } from '../types';
 import { initialUsers, initialCourses, initialClasses, initialStudents, initialTasks, initialAttendance, initialGradeLogs, initialPayments, initialChecklistTemplates, initialChecklistLogs, initialNotifications, initialSwapRequests, initialFirefighters, initialFirefighterLogs, initialBases } from '../services/mockData';
 import { supabase, isSupabaseConfigured } from '../services/supabase';
 
@@ -23,6 +23,7 @@ interface StoreContextType {
     bases: Base[];
     folders: Folder[];
     documents: DocumentFile[];
+    setupTeardownAssignments: SetupTeardownAssignment[];
 
     loading: boolean;
     login: (email: string) => Promise<void>;
@@ -67,6 +68,10 @@ interface StoreContextType {
     deleteFolder: (id: string) => Promise<void>;
     addDocument: (doc: DocumentFile) => Promise<void>;
     deleteDocument: (id: string) => Promise<void>;
+
+    // Setup/Teardown
+    addSetupTeardownAssignment: (assignment: SetupTeardownAssignment) => Promise<void>;
+    deleteSetupTeardownAssignment: (id: string) => Promise<void>;
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
@@ -237,6 +242,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const [checklistLogs, setChecklistLogs] = useState<ChecklistLog[]>([]);
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [swapRequests, setSwapRequests] = useState<SwapRequest[]>([]);
+    const [setupTeardownAssignments, setSetupTeardownAssignments] = useState<SetupTeardownAssignment[]>([]);
     const [firefighters, setFirefighters] = useState<Firefighter[]>([]);
     const [firefighterLogs, setFirefighterLogs] = useState<FirefighterLog[]>([]);
     const [bases, setBases] = useState<Base[]>([]);
@@ -661,7 +667,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     return (
         <StoreContext.Provider value={{
-            currentUser, users, courses, classes, students, tasks, attendanceLogs, gradeLogs, payments, checklistTemplates, checklistLogs, notifications, swapRequests, firefighters, firefighterLogs, bases, folders, documents,
+            currentUser, users, courses, classes, students, tasks, attendanceLogs, gradeLogs, payments, checklistTemplates, checklistLogs, notifications, swapRequests, firefighters, firefighterLogs, bases, folders, documents, setupTeardownAssignments,
             loading, login, logout,
             addUser, addCourse, updateCourse, deleteCourse, addClass, updateClass, addStudent, updateStudent, addTask, updateTask,
             addAttendanceLog, addGradeLog, addPayment, addChecklistLog, updateChecklistTemplate,
@@ -684,6 +690,28 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             deleteDocument: async (id: string) => {
                 setDocuments(documents.filter(d => d.id !== id));
                 await syncWithSupabase('documents', 'DELETE', null, id);
+            },
+
+            // Setup/Teardown
+            addSetupTeardownAssignment: async (assignment: SetupTeardownAssignment) => {
+                setSetupTeardownAssignments([...setupTeardownAssignments, assignment]);
+                await syncWithSupabase('setup_teardown_assignments', 'INSERT', {
+                    id: assignment.id,
+                    class_id: assignment.classId,
+                    class_name: assignment.className,
+                    type: assignment.type,
+                    instructor_id: assignment.instructorId,
+                    instructor_name: assignment.instructorName,
+                    days: assignment.days,
+                    rate: assignment.rate,
+                    total_value: assignment.totalValue,
+                    date: assignment.date,
+                    notes: assignment.notes
+                });
+            },
+            deleteSetupTeardownAssignment: async (id: string) => {
+                setSetupTeardownAssignments(setupTeardownAssignments.filter(a => a.id !== id));
+                await syncWithSupabase('setup_teardown_assignments', 'DELETE', null, id);
             }
         }}>
             {children}

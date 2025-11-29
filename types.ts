@@ -315,6 +315,21 @@ export interface FirefighterLog {
   details: string;
 }
 
+// Setup/Teardown Management
+export interface SetupTeardownAssignment {
+  id: string;
+  classId: string;
+  className: string;
+  type: 'Montagem' | 'Desmontagem';
+  instructorId: string;
+  instructorName: string;
+  days: number;
+  rate: number; // Always 350
+  totalValue: number; // days * 350
+  date: string;
+  notes?: string;
+}
+
 // Helper types for UI
 export const UNIFORM_SIZES = ['PP', 'P', 'M', 'G', 'GG', 'XG'];
 export const SHOE_SIZES = ['35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45'];
