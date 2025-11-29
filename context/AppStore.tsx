@@ -72,6 +72,11 @@ interface StoreContextType {
     // Setup/Teardown
     addSetupTeardownAssignment: (assignment: SetupTeardownAssignment) => Promise<void>;
     deleteSetupTeardownAssignment: (id: string) => Promise<void>;
+
+    // File Upload
+    uploadDocument: (file: File, folderId: string | null) => Promise<string>;
+    uploadProfilePhoto: (file: File, userId: string) => Promise<string>;
+    deleteFile: (bucket: string, path: string) => Promise<void>;
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
@@ -725,6 +730,106 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             deleteSetupTeardownAssignment: async (id: string) => {
                 setSetupTeardownAssignments(setupTeardownAssignments.filter(a => a.id !== id));
                 await syncWithSupabase('setup_teardown_assignments', 'DELETE', null, id);
+            },
+
+            // File Upload Functions
+            uploadDocument: async (file: File, folderId: string | null) => {
+                try {
+                    // Validar tipo de arquivo
+                    const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
+                    if (!allowedTypes.includes(file.type)) {
+                        throw new Error('Tipo de arquivo não permitido. Use PDF ou imagens.');
+                    }
+
+                    // Validar tamanho (50MB)
+                    if (file.size > 50 * 1024 * 1024) {
+                        throw new Error('Arquivo muito grande. Tamanho máximo: 50MB');
+                    }
+
+                    // Gerar nome único
+                    const fileExt = file.name.split('.').pop();
+                    const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+                    const filePath = folderId ? `${folderId}/${fileName}` : fileName;
+
+                    // Upload para Supabase
+                    const { data, error } = await supabase.storage
+                        .from('documents')
+                        .upload(filePath, file, {
+                            cacheControl: '3600',
+                            upsert: false
+                        });
+
+                    if (error) throw error;
+
+                    // Obter URL pública
+                    const { data: { publicUrl } } = supabase.storage
+                        .from('documents')
+                        .getPublicUrl(filePath);
+
+                    return publicUrl;
+                } catch (error) {
+                    console.error('Erro ao fazer upload:', error);
+                    throw error;
+                }
+            },
+
+            uploadProfilePhoto: async (file: File, userId: string) => {
+                try {
+                    // Validar tipo de arquivo
+                    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+                    if (!allowedTypes.includes(file.type)) {
+                        throw new Error('Tipo de arquivo não permitido. Use JPEG, PNG ou WebP.');
+                    }
+
+                    // Validar tamanho (5MB)
+                    if (file.size > 5 * 1024 * 1024) {
+                        throw new Error('Imagem muito grande. Tamanho máximo: 5MB');
+                    }
+
+                    // Nome do arquivo baseado no userId
+                    const fileExt = file.name.split('.').pop();
+                    const fileName = `${userId}.${fileExt}`;
+                    const filePath = `avatars/${fileName}`;
+
+                    // Deletar foto antiga se existir
+                    await supabase.storage
+                        .from('profile-photos')
+                        .remove([filePath])
+                        .catch(() => { }); // Ignorar erro se não existir
+
+                    // Upload para Supabase
+                    const { data, error } = await supabase.storage
+                        .from('profile-photos')
+                        .upload(filePath, file, {
+                            cacheControl: '3600',
+                            upsert: true
+                        });
+
+                    if (error) throw error;
+
+                    // Obter URL pública
+                    const { data: { publicUrl } } = supabase.storage
+                        .from('profile-photos')
+                        .getPublicUrl(filePath);
+
+                    return publicUrl;
+                } catch (error) {
+                    console.error('Erro ao fazer upload da foto:', error);
+                    throw error;
+                }
+            },
+
+            deleteFile: async (bucket: string, path: string) => {
+                try {
+                    const { error } = await supabase.storage
+                        .from(bucket)
+                        .remove([path]);
+
+                    if (error) throw error;
+                } catch (error) {
+                    console.error('Erro ao deletar arquivo:', error);
+                    throw error;
+                }
             }
         }}>
             {children}
