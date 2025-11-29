@@ -88,7 +88,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
                             </div>
                         )}
                         <div>
-                            <p className="text-sm font-medium text-gray-900 truncate max-w-xs">
+                            <p className="text-sm font-medium text-gray-900 truncate max-w-[200px]">
                                 {selectedFile.name}
                             </p>
                             <p className="text-xs text-gray-500">
