@@ -32,11 +32,11 @@ export const DocumentsPage: React.FC = () => {
 
     // Navigation Breadcrumbs
     const breadcrumbs = useMemo(() => {
-        const path = [];
+        const path: Folder[] = [];
         let current = folders.find(f => f.id === currentFolderId);
         while (current) {
             path.unshift(current);
-            current = folders.find(f => f.id === current.parentId);
+            current = folders.find(f => f.id === current?.parentId);
         }
         return path;
     }, [currentFolderId, folders]);
