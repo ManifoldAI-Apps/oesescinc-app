@@ -396,7 +396,7 @@ export const FinancePage: React.FC = () => {
                             <label className="text-xs font-medium text-gray-500 mb-1 block">Instrutor</label>
                             <select className={inputClass} value={instructorFilter} onChange={e => setInstructorFilter(e.target.value)}>
                                 <option value="">Todos</option>
-                                {users.filter(u => u.role === UserRole.INSTRUTOR || u.role === UserRole.COORDENADOR || u.role === UserRole.GESTOR).map(u => (
+                                {users.filter(u => u.role === UserRole.INSTRUTOR || u.role === UserRole.AUXILIAR_INSTRUCAO || u.role === UserRole.COORDENADOR || u.role === UserRole.GESTOR).map(u => (
                                     <option key={u.id} value={u.id}>{u.name}</option>
                                 ))}
                             </select>
@@ -483,8 +483,8 @@ export const FinancePage: React.FC = () => {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm">
                                             <span className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium ${log.type === 'Aula' ? 'bg-blue-100 text-blue-800' :
-                                                    log.type === 'Montagem' ? 'bg-green-100 text-green-800' :
-                                                        'bg-orange-100 text-orange-800'
+                                                log.type === 'Montagem' ? 'bg-green-100 text-green-800' :
+                                                    'bg-orange-100 text-orange-800'
                                                 }`}>
                                                 {log.type === 'Aula' && '📚 '}
                                                 {log.type === 'Montagem' && '🔧 '}
@@ -503,8 +503,8 @@ export const FinancePage: React.FC = () => {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm">
                                             <span className={`px-2 py-1 rounded text-xs ${log.modality === 'Prática' ? 'bg-orange-100 text-orange-800' :
-                                                    log.modality === 'Operacional' ? 'bg-purple-100 text-purple-800' :
-                                                        'bg-blue-100 text-blue-800'
+                                                log.modality === 'Operacional' ? 'bg-purple-100 text-purple-800' :
+                                                    'bg-blue-100 text-blue-800'
                                                 }`}>
                                                 {log.modality}
                                             </span>

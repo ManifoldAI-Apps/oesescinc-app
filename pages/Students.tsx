@@ -3,6 +3,7 @@ import React, { useState, useMemo } from 'react';
 import { useStore } from '../context/AppStore';
 import { Student, CourseType, EnrollmentStatus } from '../types';
 import { Plus, X, Pencil, Filter } from 'lucide-react';
+import { formatCPF } from '../utils/formatters';
 
 export const StudentsPage: React.FC = () => {
     const { students, addStudent, updateStudent, classes, courses } = useStore();
@@ -260,7 +261,7 @@ export const StudentsPage: React.FC = () => {
                                                 {s.enrollmentStatus}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{s.cpf}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatCPF(s.cpf)}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">{s.registro}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">{s.capCode}</td>
 
@@ -340,7 +341,14 @@ export const StudentsPage: React.FC = () => {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">CPF</label>
-                                    <input required className={inputClass} value={studentForm.cpf || ''} onChange={e => setStudentForm({ ...studentForm, cpf: e.target.value })} />
+                                    <input
+                                        required
+                                        className={inputClass}
+                                        value={formatCPF(studentForm.cpf || '')}
+                                        onChange={e => setStudentForm({ ...studentForm, cpf: formatCPF(e.target.value) })}
+                                        placeholder="000.000.000-00"
+                                        maxLength={14}
+                                    />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">RG</label>

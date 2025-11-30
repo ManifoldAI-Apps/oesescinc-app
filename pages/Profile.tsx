@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useStore } from '../context/AppStore';
 import { UNIFORM_SIZES, SHOE_SIZES } from '../types';
 import { Save, Lock, User as UserIcon } from 'lucide-react';
+import { formatCPF } from '../utils/formatters';
 
 export const ProfilePage: React.FC = () => {
     const { currentUser, updateUser } = useStore();
@@ -86,7 +87,7 @@ export const ProfilePage: React.FC = () => {
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700">CPF (Não editável)</label>
-                            <input disabled type="text" className={`${inputClass} bg-gray-100 text-gray-500 cursor-not-allowed`} value={formData.cpf} />
+                            <input disabled type="text" className={`${inputClass} bg-gray-100 text-gray-500 cursor-not-allowed`} value={formatCPF(formData.cpf)} />
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700">Email</label>

@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useStore } from '../context/AppStore';
 import { User, UserRole, UNIFORM_SIZES, SHOE_SIZES } from '../types';
 import { Plus, Search, Filter, X } from 'lucide-react';
+import { formatCPF } from '../utils/formatters';
 
 export const UsersPage: React.FC = () => {
   const { users, addUser, currentUser } = useStore();
@@ -121,12 +122,13 @@ export const UsersPage: React.FC = () => {
                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
                       ${user.role === UserRole.GESTOR ? 'bg-purple-100 text-purple-800' :
                         user.role === UserRole.INSTRUTOR ? 'bg-orange-100 text-orange-800' :
-                          'bg-gray-100 text-gray-800'}`}>
+                          user.role === UserRole.AUXILIAR_INSTRUCAO ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-gray-100 text-gray-800'}`}>
                       {user.role}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{user.cpf}</div>
+                    <div className="text-sm text-gray-900">{formatCPF(user.cpf)}</div>
                     <div className="text-sm text-gray-500">{user.phone}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -164,8 +166,15 @@ export const UsersPage: React.FC = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700">CPF</label>
-                    <input required type="text" className={inputClass}
-                      value={newUser.cpf || ''} onChange={e => setNewUser({ ...newUser, cpf: e.target.value })} />
+                    <input
+                      required
+                      type="text"
+                      className={inputClass}
+                      value={formatCPF(newUser.cpf || '')}
+                      onChange={e => setNewUser({ ...newUser, cpf: formatCPF(e.target.value) })}
+                      placeholder="000.000.000-00"
+                      maxLength={14}
+                    />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Função</label>

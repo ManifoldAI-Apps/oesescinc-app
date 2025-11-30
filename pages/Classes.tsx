@@ -107,6 +107,7 @@ export const ClassesPage: React.FC = () => {
 
     const instructors = users.filter(u =>
         u.role === UserRole.INSTRUTOR ||
+        u.role === UserRole.AUXILIAR_INSTRUCAO ||
         u.role === UserRole.COORDENADOR ||
         u.role === UserRole.GESTOR
     );

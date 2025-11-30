@@ -22,7 +22,7 @@ export const SetupTeardownPage: React.FC = () => {
     if (!currentUser) return null;
 
     const canManage = currentUser.role === UserRole.GESTOR || currentUser.role === UserRole.COORDENADOR;
-    const instructors = users.filter(u => u.role === UserRole.INSTRUTOR);
+    const instructors = users.filter(u => u.role === UserRole.INSTRUTOR || u.role === UserRole.AUXILIAR_INSTRUCAO);
 
     const filteredAssignments = useMemo(() => {
         return setupTeardownAssignments.filter(a => {
@@ -204,8 +204,8 @@ export const SetupTeardownPage: React.FC = () => {
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{assignment.className}</td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <span className={`inline-flex items-center px-2.5 py-1 text-xs font-semibold rounded-md ${assignment.type === 'Montagem'
-                                                    ? 'bg-green-100 text-green-800'
-                                                    : 'bg-orange-100 text-orange-800'
+                                                ? 'bg-green-100 text-green-800'
+                                                : 'bg-orange-100 text-orange-800'
                                                 }`}>
                                                 {assignment.type === 'Montagem' ? '🔧 ' : '📦 '}
                                                 {assignment.type}

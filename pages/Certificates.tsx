@@ -3,6 +3,7 @@ import React, { useState, useMemo } from 'react';
 import { useStore } from '../context/AppStore';
 import { CourseType, UserRole } from '../types';
 import { FileBadge, Search, Filter, Printer, Award } from 'lucide-react';
+import { formatCPF } from '../utils/formatters';
 
 export const CertificatesPage: React.FC = () => {
     const { students, classes, courses, currentUser } = useStore();
@@ -131,7 +132,7 @@ export const CertificatesPage: React.FC = () => {
                                 </div>
                                 <div>
                                     <h3 className="font-bold text-gray-900 text-lg">{cert.name}</h3>
-                                    <p className="text-sm text-gray-500">CPF: {cert.cpf}</p>
+                                    <p className="text-sm text-gray-500">CPF: {formatCPF(cert.cpf)}</p>
                                     <div className="flex flex-wrap gap-2 mt-2">
                                         <span className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded text-xs border border-blue-100">
                                             Mat: {cert.matricula}

@@ -1,10 +1,11 @@
 
 export enum UserRole {
-  GESTOR = 'Gestor',
+  AUXILIAR_INSTRUCAO = 'Auxiliar de Instrução',
   COORDENADOR = 'Coordenador',
+  EMBAIXADOR = 'Embaixador',
+  GESTOR = 'Gestor',
   INSTRUTOR = 'Instrutor',
   MOTORISTA = 'Motorista',
-  EMBAIXADOR = 'Embaixador',
 }
 
 export enum CourseType {
