@@ -15,7 +15,16 @@ export const EvaluationsPage: React.FC = () => {
 
     const selectedClass = classes.find(c => c.id === selectedClassId);
     const course = selectedClass ? courses.find(c => c.id === selectedClass.courseId) : null;
+
+    console.log('🎓 Evaluations Debug:');
+    console.log('  - Selected Class:', selectedClass);
+    console.log('  - Selected Class studentIds:', selectedClass?.studentIds);
+    console.log('  - All students in store:', students);
+    console.log('  - Students count:', students.length);
+
     const classStudents = selectedClass ? students.filter(s => selectedClass.studentIds.includes(s.id)) : [];
+    console.log('  - Filtered classStudents:', classStudents);
+    console.log('  - Filtered count:', classStudents.length);
 
     const schema = course ? EVALUATION_SCHEMAS[course.type] || EVALUATION_SCHEMAS[CourseType.CUSTOM] : null;
 

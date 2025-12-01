@@ -240,8 +240,11 @@ export const CoursesPage: React.FC = () => {
                                         <input
                                             type="number"
                                             className={inputClass}
-                                            value={tempSubject.hours}
-                                            onChange={e => setTempSubject({ ...tempSubject, hours: parseInt(e.target.value) })}
+                                            value={tempSubject.hours || ''}
+                                            onChange={e => {
+                                                const val = parseInt(e.target.value);
+                                                setTempSubject({ ...tempSubject, hours: isNaN(val) ? 0 : val });
+                                            }}
                                         />
                                     </div>
                                     <div className="md:col-span-2">

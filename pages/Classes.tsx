@@ -80,6 +80,12 @@ const MultiSelect: React.FC<MultiSelectProps> = ({ options, selectedIds, onChang
 
 export const ClassesPage: React.FC = () => {
     const { classes, courses, users, addClass, updateClass, requestSwap, currentUser } = useStore();
+
+    console.log('🏫 ClassesPage Debug:');
+    console.log('  - Classes from store:', classes);
+    console.log('  - Courses from store:', courses);
+    console.log('  - Users from store:', users);
+
     const [view, setView] = useState<'list' | 'create' | 'details'>('list');
     const [selectedClass, setSelectedClass] = useState<ClassGroup | null>(null);
 
@@ -148,7 +154,7 @@ export const ClassesPage: React.FC = () => {
         let currentDate = new Date(start);
 
         // Deep copy subjects to track remaining hours
-        let subjectQueue = subjects.map(s => ({ ...s, remaining: s.hours }));
+        let subjectQueue = subjects.map(s => ({ ...s, remaining: Number(s.hours) || 0 }));
 
         const dayStartHour = 8; // 08:00
         const lunchStartHour = 12; // 12:00
@@ -170,7 +176,7 @@ export const ClassesPage: React.FC = () => {
             const skipDay = (day === 0 && !config.includeSun) || (day === 6 && !config.includeSat);
 
             if (!skipDay) {
-                let hoursAvailableToday = config.hoursPerDay;
+                let hoursAvailableToday = Number(config.hoursPerDay);
                 let currentHour = dayStartHour;
 
                 while (hoursAvailableToday > 0 && subjectQueue.length > 0) {
@@ -228,15 +234,41 @@ export const ClassesPage: React.FC = () => {
         const course = courses.find(c => c.id === newClass.courseId);
         if (!course) return;
 
-        // Filter subjects by modality
-        const theorySubjects = course.subjects.filter(s => s.modality === 'Teórica');
-        const practiceSubjects = course.subjects.filter(s => s.modality === 'Prática');
+        // Filter subjects by modality (Robust check)
+        const subjects = course.subjects || [];
+
+        // Debug: Check what we have
+        if (subjects.length === 0) {
+            console.warn("DEBUG: Course has no subjects!", course);
+        }
+
+        const theorySubjects = subjects.filter(s =>
+            s.modality === 'Teórica' ||
+            s.modality === 'Teorica' ||
+            (s.modality && s.modality.includes('Te'))
+        );
+
+        const practiceSubjects = subjects.filter(s =>
+            s.modality === 'Prática' ||
+            s.modality === 'Pratica' ||
+            (s.modality && s.modality.includes('Pr'))
+        );
 
         const config = {
             includeSat: !!newClass.includeSaturday,
             includeSun: !!newClass.includeSunday,
             hoursPerDay: newClass.hoursPerDay || 8
         };
+
+        console.log('DEBUG: Calculating Schedule', {
+            courseId: newClass.courseId,
+            courseName: course.name,
+            totalSubjects: course.subjects?.length,
+            theorySubjects,
+            practiceSubjects,
+            theoryStart: newClass.theoryStartDate,
+            practiceStart: newClass.practiceStartDate
+        });
 
         const theorySchedule = generateSubSchedule(
             theorySubjects,

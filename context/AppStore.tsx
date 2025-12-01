@@ -84,60 +84,66 @@ const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
 // --- Helpers for Data Mapping ---
 
-const mapClassFromDB = (dbClass: any): ClassGroup => ({
-    id: dbClass.id,
-    name: dbClass.name,
-    startDate: dbClass.start_date,
-    endDate: dbClass.end_date,
-    courseId: dbClass.course_id,
-    studentIds: dbClass.student_ids || [], // Assuming this might be a join or separate fetch, but keeping simple for now
-    daysOfWeek: dbClass.days_of_week || [],
-    includeWeekends: false, // Deprecated in DB?
-    includeSaturday: dbClass.include_saturday,
-    includeSunday: dbClass.include_sunday,
-    hoursPerDay: dbClass.hours_per_day,
-    theoryStartDate: dbClass.theory_start_date,
-    practiceStartDate: dbClass.practice_start_date,
-    registrationNumber: dbClass.registration_number,
-    capBa: dbClass.cap_ba,
-    schedule: dbClass.subjects || [], // The JSONB column is named 'subjects' in DB but maps to 'schedule' in types? Wait, let's check types.ts. 
-    // In types.ts: schedule: ClassScheduleItem[]. 
-    // In DB: subjects jsonb. 
-    // So yes, map dbClass.subjects to schedule.
-    setupInstructor1Id: dbClass.setup_instructor_1_id,
-    setupInstructor1Days: dbClass.setup_instructor_1_days,
-    setupInstructor2Id: dbClass.setup_instructor_2_id,
-    setupInstructor2Days: dbClass.setup_instructor_2_days,
-    teardownInstructor1Id: dbClass.teardown_instructor_1_id,
-    teardownInstructor1Days: dbClass.teardown_instructor_1_days,
-    teardownInstructor2Id: dbClass.teardown_instructor_2_id,
-    teardownInstructor2Days: dbClass.teardown_instructor_2_days
-});
+const mapClassFromDB = (dbClass: any): ClassGroup => {
+    console.log('📚 mapClassFromDB - Raw DB data:', dbClass);
+    const mapped = {
+        id: dbClass.id,
+        name: dbClass.name,
+        startDate: dbClass.start_date,
+        endDate: dbClass.end_date,
+        courseId: dbClass.course_id,
+        studentIds: dbClass.student_ids || [],
+        daysOfWeek: dbClass.days_of_week || [],
+        includeWeekends: false, // Deprecated in DB
+        includeSaturday: dbClass.include_saturday,
+        includeSunday: dbClass.include_sunday,
+        hoursPerDay: dbClass.hours_per_day,
+        theoryStartDate: dbClass.theory_start_date,
+        practiceStartDate: dbClass.practice_start_date,
+        registrationNumber: dbClass.registration_number,
+        capBa: dbClass.cap_ba,
+        schedule: dbClass.schedule || [], // Correct: DB column is 'schedule', maps to 'schedule' in types
+        setupInstructor1Id: dbClass.setup_instructor_1_id,
+        setupInstructor1Days: dbClass.setup_instructor_1_days,
+        setupInstructor2Id: dbClass.setup_instructor_2_id,
+        setupInstructor2Days: dbClass.setup_instructor_2_days,
+        teardownInstructor1Id: dbClass.teardown_instructor_1_id,
+        teardownInstructor1Days: dbClass.teardown_instructor_1_days,
+        teardownInstructor2Id: dbClass.teardown_instructor_2_id,
+        teardownInstructor2Days: dbClass.teardown_instructor_2_days
+    };
+    console.log('📚 mapClassFromDB - Mapped class:', mapped);
+    return mapped;
+};
 
-const mapClassToDB = (cls: ClassGroup) => ({
-    id: cls.id,
-    name: cls.name,
-    start_date: cls.startDate,
-    end_date: cls.endDate,
-    course_id: cls.courseId,
-    days_of_week: cls.daysOfWeek,
-    include_saturday: cls.includeSaturday,
-    include_sunday: cls.includeSunday,
-    hours_per_day: cls.hoursPerDay,
-    theory_start_date: cls.theoryStartDate,
-    practice_start_date: cls.practiceStartDate,
-    registration_number: cls.registrationNumber,
-    cap_ba: cls.capBa,
-    subjects: cls.schedule, // Mapping schedule back to subjects JSONB column
-    setup_instructor_1_id: cls.setupInstructor1Id || null,
-    setup_instructor_1_days: cls.setupInstructor1Days || 0,
-    setup_instructor_2_id: cls.setupInstructor2Id || null,
-    setup_instructor_2_days: cls.setupInstructor2Days || 0,
-    teardown_instructor_1_id: cls.teardownInstructor1Id || null,
-    teardown_instructor_1_days: cls.teardownInstructor1Days || 0,
-    teardown_instructor_2_id: cls.teardownInstructor2Id || null,
-    teardown_instructor_2_days: cls.teardownInstructor2Days || 0
-});
+const mapClassToDB = (cls: ClassGroup) => {
+    console.log('🔄 mapClassToDB (VERSION 2.0 - FIXED) called for:', cls.name);
+    return {
+        id: cls.id,
+        name: cls.name,
+        start_date: cls.startDate,
+        end_date: cls.endDate,
+        course_id: cls.courseId,
+        student_ids: cls.studentIds || [],
+        days_of_week: cls.daysOfWeek || [],
+        include_saturday: cls.includeSaturday,
+        include_sunday: cls.includeSunday,
+        hours_per_day: cls.hoursPerDay,
+        theory_start_date: cls.theoryStartDate,
+        practice_start_date: cls.practiceStartDate,
+        registration_number: cls.registrationNumber,
+        cap_ba: cls.capBa,
+        schedule: cls.schedule || [], // Correct column name is 'schedule', not 'subjects'
+        setup_instructor_1_id: cls.setupInstructor1Id || null,
+        setup_instructor_1_days: cls.setupInstructor1Days || 0,
+        setup_instructor_2_id: cls.setupInstructor2Id || null,
+        setup_instructor_2_days: cls.setupInstructor2Days || 0,
+        teardown_instructor_1_id: cls.teardownInstructor1Id || null,
+        teardown_instructor_1_days: cls.teardownInstructor1Days || 0,
+        teardown_instructor_2_id: cls.teardownInstructor2Id || null,
+        teardown_instructor_2_days: cls.teardownInstructor2Days || 0
+    };
+};
 
 const mapSwapRequestFromDB = (db: any): SwapRequest => ({
     id: db.id,
@@ -261,18 +267,40 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }, []);
 
     const seedDatabase = async () => {
-        console.log("🌱 Database appears empty. Seeding initial data...");
+        console.log("🌱 Database appears incomplete. Seeding initial data...");
         try {
-            await supabase.from('users').insert(initialUsers);
-            await supabase.from('courses').insert(initialCourses);
-            await supabase.from('classes').insert(initialClasses);
-            await supabase.from('students').insert(initialStudents);
-            await supabase.from('tasks').insert(initialTasks);
-            await supabase.from('attendance_logs').insert(initialAttendance);
-            await supabase.from('grade_logs').insert(initialGradeLogs);
-            await supabase.from('checklist_templates').insert(initialChecklistTemplates);
-            await supabase.from('bases').insert(initialBases);
-            await supabase.from('firefighters').insert(initialFirefighters);
+            const options = { onConflict: 'id', ignoreDuplicates: true };
+
+            const mappedUsers = initialUsers.map(mapUserToDB);
+            await supabase.from('users').upsert(mappedUsers, options);
+
+            const mappedCourses = initialCourses.map(mapCourseToDB);
+            await supabase.from('courses').upsert(mappedCourses, options);
+
+            const mappedClasses = initialClasses.map(mapClassToDB);
+            await supabase.from('classes').upsert(mappedClasses, options);
+
+            const mappedStudents = initialStudents.map(mapStudentToDB);
+            await supabase.from('students').upsert(mappedStudents, options);
+
+            const mappedTasks = initialTasks.map(mapTaskToDB);
+            await supabase.from('tasks').upsert(mappedTasks, options);
+
+            const mappedAttendance = initialAttendance.map(mapAttendanceLogToDB);
+            await supabase.from('attendance_logs').upsert(mappedAttendance, options);
+
+            const mappedGradeLogs = initialGradeLogs.map(mapGradeLogToDB);
+            await supabase.from('grade_logs').upsert(mappedGradeLogs, options);
+
+            const mappedTemplates = initialChecklistTemplates.map(mapChecklistTemplateToDB);
+            await supabase.from('checklist_templates').upsert(mappedTemplates, options);
+
+            const mappedBases = initialBases.map(mapBaseToDB);
+            await supabase.from('bases').upsert(mappedBases, options);
+
+            const mappedFirefighters = initialFirefighters.map(mapFirefighterToDB);
+            await supabase.from('firefighters').upsert(mappedFirefighters, options);
+
             console.log("✅ Database seeded successfully.");
         } catch (e) {
             console.error("❌ Error seeding database:", e);
@@ -294,10 +322,12 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             console.log('Key:', import.meta.env.VITE_SUPABASE_ANON_KEY ? 'Set' : 'Not set');
 
             try {
-                // Check if we need to seed (Only works if tables exist)
-                const { count, error } = await supabase.from('users').select('*', { count: 'exact', head: true });
+                // Check if we need to seed (If users OR courses OR classes are missing)
+                const { count: userCount } = await supabase.from('users').select('*', { count: 'exact', head: true });
+                const { count: courseCount } = await supabase.from('courses').select('*', { count: 'exact', head: true });
+                const { count: classCount } = await supabase.from('classes').select('*', { count: 'exact', head: true });
 
-                if (!error && count === 0) {
+                if ((userCount === 0 || courseCount === 0 || classCount === 0)) {
                     await seedDatabase();
                 }
 
@@ -315,7 +345,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
                 await Promise.all([
                     safeFetch('users', setUsers, mapUserFromDB),
-                    safeFetch('courses', setCourses),
+                    safeFetch('courses', setCourses, mapCourseFromDB),
                     safeFetch('classes', setClasses, mapClassFromDB),
                     safeFetch('students', setStudents, mapStudentFromDB),
                     safeFetch('tasks', setTasks, mapTaskFromDB),
@@ -347,14 +377,11 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                 ]);
             } catch (e) {
                 console.error("Critical Supabase connection error:", e);
-                // In case of critical failure, we might want to show an error state instead of mock data
-                // But for now, we just leave it empty to respect "Exclusive Persistence"
             }
         } else {
             console.warn("⚠️ Supabase not configured. App will be empty.");
             console.warn('VITE_SUPABASE_URL:', import.meta.env.VITE_SUPABASE_URL || 'NOT SET');
             console.warn('VITE_SUPABASE_ANON_KEY:', import.meta.env.VITE_SUPABASE_ANON_KEY ? 'SET' : 'NOT SET');
-            // No mock data fallback
         }
         setLoading(false);
     };
@@ -474,14 +501,40 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         await syncWithSupabase('users', 'UPDATE', mapUserToDB(user), user.id);
     };
 
+    const mapCourseToDB = (course: Course) => {
+        const mapped = {
+            id: course.id,
+            name: course.name,
+            type: course.type,
+            subjects: course.subjects
+        };
+        console.log('📊 mapCourseToDB - Input course:', course);
+        console.log('📊 mapCourseToDB - Mapped data:', mapped);
+        console.log('📊 mapCourseToDB - Subjects array:', JSON.stringify(course.subjects));
+        return mapped;
+    };
+
+    const mapCourseFromDB = (db: any): Course => {
+        console.log('📥 mapCourseFromDB - Raw DB data:', db);
+        console.log('📥 mapCourseFromDB - DB subjects:', db.subjects);
+        const mapped = {
+            id: db.id,
+            name: db.name,
+            type: db.type,
+            subjects: db.subjects || []
+        };
+        console.log('📥 mapCourseFromDB - Mapped course:', mapped);
+        return mapped;
+    };
+
     const addCourse = async (course: Course) => {
         setCourses([...courses, course]);
-        await syncWithSupabase('courses', 'INSERT', course);
+        await syncWithSupabase('courses', 'INSERT', mapCourseToDB(course));
     };
 
     const updateCourse = async (course: Course) => {
         setCourses(courses.map(c => c.id === course.id ? course : c));
-        await syncWithSupabase('courses', 'UPDATE', course);
+        await syncWithSupabase('courses', 'UPDATE', mapCourseToDB(course));
     };
 
     const deleteCourse = async (id: string) => {
@@ -490,8 +543,10 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
 
     const addClass = async (cls: ClassGroup) => {
+        console.log('➕ addClass called with:', cls);
         setClasses([...classes, cls]);
         const dbData = mapClassToDB(cls);
+        console.log('📦 addClass - Mapped DB data:', dbData);
         await syncWithSupabase('classes', 'INSERT', dbData);
     };
 
