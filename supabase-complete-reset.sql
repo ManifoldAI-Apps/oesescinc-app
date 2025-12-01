@@ -359,9 +359,8 @@ INSERT INTO public.users (
 );
 
 -- 5. MENSAGEM FINAL
-DO $$
-BEGIN
-    RAISE NOTICE '✅ BANCO DE DADOS RESETADO COM SUCESSO!';
-    RAISE NOTICE 'Todas as tabelas foram recriadas com schema correto.';
-    RAISE NOTICE 'Usuário Mestre criado: admin@medgroup.com';
-END $$;
+-- ============================================
+-- ✅ BANCO DE DADOS RESETADO COM SUCESSO!
+-- Todas as tabelas foram recriadas com schema correto.
+-- Usuário Mestre criado: admin@medgroup.com
+-- ============================================
