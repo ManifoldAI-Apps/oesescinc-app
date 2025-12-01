@@ -37,6 +37,7 @@ interface StoreContextType {
 
     addClass: (cls: ClassGroup) => Promise<void>;
     updateClass: (cls: ClassGroup) => Promise<void>;
+    deleteClass: (id: string) => Promise<void>;
 
     addStudent: (student: Student) => Promise<void>;
     updateStudent: (student: Student) => Promise<void>;
@@ -568,6 +569,11 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         await syncWithSupabase('classes', 'UPDATE', dbData);
     };
 
+    const deleteClass = async (id: string) => {
+        setClasses(classes.filter(c => c.id !== id));
+        await syncWithSupabase('classes', 'DELETE', null, id);
+    };
+
     const addStudent = async (student: Student) => {
         setStudents([...students, student]);
         await syncWithSupabase('students', 'INSERT', mapStudentToDB(student));
@@ -803,7 +809,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         <StoreContext.Provider value={{
             currentUser, users, courses, classes, students, tasks, attendanceLogs, gradeLogs, payments, checklistTemplates, checklistLogs, notifications, swapRequests, firefighters, firefighterLogs, bases, folders, documents, setupTeardownAssignments,
             loading, login, logout,
-            addUser, addCourse, updateCourse, deleteCourse, addClass, updateClass, addStudent, updateStudent, deleteStudent, addTask, updateTask, deleteTask,
+            addUser, addCourse, updateCourse, deleteCourse, addClass, updateClass, deleteClass, addStudent, updateStudent, deleteStudent, addTask, updateTask, deleteTask,
             addAttendanceLog, addGradeLog, addPayment, deletePayment, addChecklistLog, updateChecklistTemplate,
             markNotificationAsRead, requestSwap, resolveSwapRequest,
             addFirefighter, updateFirefighter, deleteFirefighter, addFirefighterLog,

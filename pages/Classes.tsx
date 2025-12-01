@@ -79,7 +79,7 @@ const MultiSelect: React.FC<MultiSelectProps> = ({ options, selectedIds, onChang
 };
 
 export const ClassesPage: React.FC = () => {
-    const { classes, courses, users, addClass, updateClass, requestSwap, currentUser } = useStore();
+    const { classes, courses, users, addClass, updateClass, deleteClass, requestSwap, currentUser } = useStore();
 
     console.log('🏫 ClassesPage Debug:');
     console.log('  - Classes from store:', classes);
@@ -870,13 +870,29 @@ export const ClassesPage: React.FC = () => {
                                 <span className={`text-xs font-medium px-2 py-1 rounded-full ${status.color}`}>
                                     {status.label}
                                 </span>
-                                <button
-                                    onClick={(e) => { e.stopPropagation(); exportToPDF(cls); }}
-                                    className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50 transition"
-                                    title="Baixar PDF"
-                                >
-                                    <Download size={18} />
-                                </button>
+                                <div className="flex space-x-2">
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); exportToPDF(cls); }}
+                                        className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50 transition"
+                                        title="Baixar PDF"
+                                    >
+                                        <Download size={18} />
+                                    </button>
+                                    {(currentUser?.role === UserRole.GESTOR || currentUser?.role === UserRole.COORDENADOR) && (
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                if (window.confirm(`Tem certeza que deseja excluir a turma "${cls.name}"? Esta ação não pode ser desfeita.`)) {
+                                                    deleteClass(cls.id);
+                                                }
+                                            }}
+                                            className="text-gray-400 hover:text-red-600 p-1 rounded-full hover:bg-red-50 transition"
+                                            title="Excluir Turma"
+                                        >
+                                            <Trash2 size={18} />
+                                        </button>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     )
