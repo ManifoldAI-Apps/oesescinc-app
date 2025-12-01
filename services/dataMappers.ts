@@ -81,8 +81,6 @@ export const mapTaskToDB = (task: Task) => ({
     assignee_id: task.assigneeId,
     priority: task.priority,
     status: task.status,
-    comments: task.comments,
-    logs: task.logs,
     resolution_notes: task.resolutionNotes
 });
 
