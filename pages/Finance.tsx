@@ -166,6 +166,8 @@ export const FinancePage: React.FC = () => {
                 role: string,
                 totalHours: number,
                 totalValue: number,
+                paidValue: number,
+                pendingValue: number,
                 classesParticipated: Set<string>,
                 totalEvents: number
             }
@@ -178,12 +180,19 @@ export const FinancePage: React.FC = () => {
                     role: item.instructorRole,
                     totalHours: 0,
                     totalValue: 0,
+                    paidValue: 0,
+                    pendingValue: 0,
                     classesParticipated: new Set(),
                     totalEvents: 0
                 };
             }
             statsMap[item.instructorId].totalHours += item.hours ?? 0;
             statsMap[item.instructorId].totalValue += item.value;
+            if (item.status === 'Pago') {
+                statsMap[item.instructorId].paidValue += item.value;
+            } else {
+                statsMap[item.instructorId].pendingValue += item.value;
+            }
             statsMap[item.instructorId].classesParticipated.add(item.classId);
             statsMap[item.instructorId].totalEvents += 1;
         });
@@ -348,6 +357,8 @@ export const FinancePage: React.FC = () => {
                                     <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Part. em Turmas</th>
                                     <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Total Aulas</th>
                                     <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Horas Ministradas</th>
+                                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Valor Recebido</th>
+                                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Valor a Receber</th>
                                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Total Acumulado</th>
                                 </tr>
                             </thead>
@@ -364,6 +375,12 @@ export const FinancePage: React.FC = () => {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-center font-bold text-blue-600">
                                             {stat.totalHours}h
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-right font-bold text-green-600">
+                                            R$ {stat.paidValue.toFixed(2)}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-right font-bold text-orange-600">
+                                            R$ {stat.pendingValue.toFixed(2)}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-right font-bold text-gray-900">
                                             R$ {stat.totalValue.toFixed(2)}
@@ -547,8 +564,8 @@ export const FinancePage: React.FC = () => {
                                                 onClick={() => handleTogglePaymentStatus(log)}
                                                 disabled={!canManagePayments}
                                                 className={`px-2 py-1 rounded-full text-xs font-bold transition-colors ${log.status === 'Pago'
-                                                        ? 'bg-green-100 text-green-800 hover:bg-green-200'
-                                                        : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
+                                                    ? 'bg-green-100 text-green-800 hover:bg-green-200'
+                                                    : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
                                                     }`}
                                                 title={canManagePayments ? "Clique para alterar status" : ""}
                                             >

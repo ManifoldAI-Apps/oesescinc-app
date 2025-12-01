@@ -127,13 +127,49 @@ export const TasksPage: React.FC = () => {
     };
 
     // --- Filtering ---
-    const visibleTasks = tasks.filter(t => {
-        // 1. Private tasks (no assignee): Only Creator sees them
-        if (!t.assigneeId) return t.creatorId === currentUser?.id;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-        // 2. Assigned tasks: Creator (Manager/Coord) and Assignee (Instructor/Driver) see them
-        return t.creatorId === currentUser?.id || t.assigneeId === currentUser?.id;
-    }).filter(t => showCompleted ? t.status === 'Concluída' : t.status !== 'Concluída');
+    const overdueTasks = tasks.filter(t => {
+        // 1. Private tasks (no assignee): Only Creator sees them
+        if (!t.assigneeId && t.creatorId !== currentUser?.id) return false;
+        // 2. Assigned tasks: Creator and Assignee see them
+        if (t.assigneeId && t.creatorId !== currentUser?.id && t.assigneeId !== currentUser?.id) return false;
+
+        // Must not be completed
+        if (t.status === 'Concluída') return false;
+
+        // Must have a deadline and be past it
+        if (!t.deadline) return false;
+        const deadline = new Date(t.deadline);
+        deadline.setHours(0, 0, 0, 0);
+        return deadline < today;
+    });
+
+    const pendingTasks = tasks.filter(t => {
+        // 1. Private tasks (no assignee): Only Creator sees them
+        if (!t.assigneeId && t.creatorId !== currentUser?.id) return false;
+        // 2. Assigned tasks: Creator and Assignee see them
+        if (t.assigneeId && t.creatorId !== currentUser?.id && t.assigneeId !== currentUser?.id) return false;
+
+        // Must not be completed
+        if (t.status === 'Concluída') return false;
+
+        // Either no deadline or not past deadline
+        if (!t.deadline) return true;
+        const deadline = new Date(t.deadline);
+        deadline.setHours(0, 0, 0, 0);
+        return deadline >= today;
+    });
+
+    const completedTasks = tasks.filter(t => {
+        // 1. Private tasks (no assignee): Only Creator sees them
+        if (!t.assigneeId && t.creatorId !== currentUser?.id) return false;
+        // 2. Assigned tasks: Creator and Assignee see them
+        if (t.assigneeId && t.creatorId !== currentUser?.id && t.assigneeId !== currentUser?.id) return false;
+
+        return t.status === 'Concluída';
+    });
 
     // Assignable Users: Instructors and Drivers
     const assignableUsers = users.filter(u =>
@@ -156,82 +192,219 @@ export const TasksPage: React.FC = () => {
                 </button>
             </div>
 
-            {/* Toggle Completed */}
+            {/* Toggle Tabs */}
             <div className="flex gap-2 border-b border-gray-200">
                 <button
                     onClick={() => setShowCompleted(false)}
                     className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${!showCompleted ? 'border-primary-600 text-primary-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
                 >
-                    Pendentes
+                    Ativas ({overdueTasks.length + pendingTasks.length})
                 </button>
                 <button
                     onClick={() => setShowCompleted(true)}
                     className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${showCompleted ? 'border-primary-600 text-primary-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
                 >
-                    Concluídas
+                    Concluídas ({completedTasks.length})
                 </button>
             </div>
 
-            <div className="grid grid-cols-1 gap-4">
-                {visibleTasks.length === 0 && (
-                    <div className="text-center py-12 text-gray-500 bg-white rounded-lg border border-dashed border-gray-300">
-                        {showCompleted ? 'Nenhuma tarefa concluída.' : 'Você não possui tarefas pendentes.'}
-                    </div>
-                )}
-                {visibleTasks.map(task => {
-                    const isCreator = currentUser?.id === task.creatorId;
-                    const isAssignee = currentUser?.id === task.assigneeId;
-                    const isPrivate = !task.assigneeId;
-
-                    return (
-                        <div key={task.id} className="card-premium stagger-item p-5 flex flex-col md:flex-row justify-between cursor-pointer group" onClick={() => setSelectedTask(task)}>
-                            <div className="flex-1">
-                                <div className="flex items-center space-x-3 mb-2">
-                                    <h3 className="font-bold text-lg text-gray-900">{task.title}</h3>
-                                    <span className={`badge text-xs px-2 py-1 rounded font-medium transition-transform group-hover:scale-110 ${task.priority === 'Alta' ? 'badge-error' :
-                                        task.priority === 'Média' ? 'bg-yellow-100 text-yellow-800' :
-                                            'bg-green-100 text-green-800'
-                                        }`}>
-                                        {task.priority}
-                                    </span>
-                                    <span className={`badge text-xs px-2 py-1 rounded font-medium transition-transform group-hover:scale-110 ${task.status === 'Concluída' ? 'badge-success' :
-                                        task.status === 'Aguardando Aprovação' ? 'bg-blue-100 text-blue-800' :
-                                            'bg-gray-100 text-gray-600'
-                                        }`}>
-                                        {task.status}
-                                    </span>
-                                </div>
-                                <p className="text-sm text-gray-600 line-clamp-2 mb-3">{task.description}</p>
-
-                                <div className="flex flex-wrap items-center gap-4 text-xs text-gray-500">
-                                    <span className="flex items-center gap-1">
-                                        <Clock size={14} /> Prazo: {task.deadline ? new Date(task.deadline).toLocaleDateString() : 'Sem prazo'}
-                                    </span>
-                                    {isPrivate ? (
-                                        <span className="bg-gray-100 px-2 py-0.5 rounded text-gray-700">Privada</span>
-                                    ) : (
-                                        <>
-                                            <span className="flex items-center gap-1">
-                                                <ArrowRight size={14} /> De: <strong>{users.find(u => u.id === task.creatorId)?.name.split(' ')[0]}</strong>
-                                            </span>
-                                            <span className="flex items-center gap-1">
-                                                <UserIcon size={14} /> Para: <strong>{users.find(u => u.id === task.assigneeId)?.name}</strong>
-                                            </span>
-                                        </>
-                                    )}
-                                    <span className="flex items-center gap-1">
-                                        <MessageSquare size={14} /> {task.comments?.length || 0} Comentários
-                                    </span>
-                                </div>
+            {!showCompleted ? (
+                <>
+                    {/* Overdue Tasks Section */}
+                    {overdueTasks.length > 0 && (
+                        <div className="space-y-4">
+                            <div className="flex items-center gap-2">
+                                <AlertCircle className="text-red-500" size={20} />
+                                <h2 className="text-lg font-bold text-red-600">Tarefas Atrasadas ({overdueTasks.length})</h2>
                             </div>
+                            <div className="grid grid-cols-1 gap-4">
+                                {overdueTasks.map(task => {
+                                    const isCreator = currentUser?.id === task.creatorId;
+                                    const isAssignee = currentUser?.id === task.assigneeId;
+                                    const isPrivate = !task.assigneeId;
 
-                            <div className="mt-4 md:mt-0 md:ml-6 flex items-center justify-end">
-                                <ChevronRight size={24} className="text-gray-300 group-hover:text-primary-500 group-hover:translate-x-1 transition-all" />
+                                    return (
+                                        <div key={task.id} className="card-premium stagger-item p-5 flex flex-col md:flex-row justify-between cursor-pointer group border-l-4 border-red-500" onClick={() => setSelectedTask(task)}>
+                                            <div className="flex-1">
+                                                <div className="flex items-center space-x-3 mb-2">
+                                                    <h3 className="font-bold text-lg text-gray-900">{task.title}</h3>
+                                                    <span className={`badge text-xs px-2 py-1 rounded font-medium transition-transform group-hover:scale-110 ${task.priority === 'Alta' ? 'badge-error' :
+                                                        task.priority === 'Média' ? 'bg-yellow-100 text-yellow-800' :
+                                                            'bg-green-100 text-green-800'
+                                                        }`}>
+                                                        {task.priority}
+                                                    </span>
+                                                    <span className={`badge text-xs px-2 py-1 rounded font-medium transition-transform group-hover:scale-110 ${task.status === 'Concluída' ? 'badge-success' :
+                                                        task.status === 'Aguardando Aprovação' ? 'bg-blue-100 text-blue-800' :
+                                                            'bg-gray-100 text-gray-600'
+                                                        }`}>
+                                                        {task.status}
+                                                    </span>
+                                                </div>
+                                                <p className="text-sm text-gray-600 line-clamp-2 mb-3">{task.description}</p>
+
+                                                <div className="flex flex-wrap items-center gap-4 text-xs text-gray-500">
+                                                    <span className="flex items-center gap-1 text-red-600 font-bold">
+                                                        <Clock size={14} /> Atrasada: {task.deadline ? new Date(task.deadline).toLocaleDateString() : 'Sem prazo'}
+                                                    </span>
+                                                    {isPrivate ? (
+                                                        <span className="bg-gray-100 px-2 py-0.5 rounded text-gray-700">Privada</span>
+                                                    ) : (
+                                                        <>
+                                                            <span className="flex items-center gap-1">
+                                                                <ArrowRight size={14} /> De: <strong>{users.find(u => u.id === task.creatorId)?.name.split(' ')[0]}</strong>
+                                                            </span>
+                                                            <span className="flex items-center gap-1">
+                                                                <UserIcon size={14} /> Para: <strong>{users.find(u => u.id === task.assigneeId)?.name}</strong>
+                                                            </span>
+                                                        </>
+                                                    )}
+                                                    <span className="flex items-center gap-1">
+                                                        <MessageSquare size={14} /> {task.comments?.length || 0} Comentários
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <div className="mt-4 md:mt-0 md:ml-6 flex items-center justify-end">
+                                                <ChevronRight size={24} className="text-gray-300 group-hover:text-primary-500 group-hover:translate-x-1 transition-all" />
+                                            </div>
+                                        </div>
+                                    );
+                                })}
                             </div>
                         </div>
-                    );
-                })}
-            </div>
+                    )}
+
+                    {/* Pending Tasks Section */}
+                    {pendingTasks.length > 0 && (
+                        <div className="space-y-4">
+                            <div className="flex items-center gap-2">
+                                <Clock className="text-blue-500" size={20} />
+                                <h2 className="text-lg font-bold text-gray-800">Tarefas Pendentes ({pendingTasks.length})</h2>
+                            </div>
+                            <div className="grid grid-cols-1 gap-4">
+                                {pendingTasks.map(task => {
+                                    const isCreator = currentUser?.id === task.creatorId;
+                                    const isAssignee = currentUser?.id === task.assigneeId;
+                                    const isPrivate = !task.assigneeId;
+
+                                    return (
+                                        <div key={task.id} className="card-premium stagger-item p-5 flex flex-col md:flex-row justify-between cursor-pointer group" onClick={() => setSelectedTask(task)}>
+                                            <div className="flex-1">
+                                                <div className="flex items-center space-x-3 mb-2">
+                                                    <h3 className="font-bold text-lg text-gray-900">{task.title}</h3>
+                                                    <span className={`badge text-xs px-2 py-1 rounded font-medium transition-transform group-hover:scale-110 ${task.priority === 'Alta' ? 'badge-error' :
+                                                        task.priority === 'Média' ? 'bg-yellow-100 text-yellow-800' :
+                                                            'bg-green-100 text-green-800'
+                                                        }`}>
+                                                        {task.priority}
+                                                    </span>
+                                                    <span className={`badge text-xs px-2 py-1 rounded font-medium transition-transform group-hover:scale-110 ${task.status === 'Concluída' ? 'badge-success' :
+                                                        task.status === 'Aguardando Aprovação' ? 'bg-blue-100 text-blue-800' :
+                                                            'bg-gray-100 text-gray-600'
+                                                        }`}>
+                                                        {task.status}
+                                                    </span>
+                                                </div>
+                                                <p className="text-sm text-gray-600 line-clamp-2 mb-3">{task.description}</p>
+
+                                                <div className="flex flex-wrap items-center gap-4 text-xs text-gray-500">
+                                                    <span className="flex items-center gap-1">
+                                                        <Clock size={14} /> Prazo: {task.deadline ? new Date(task.deadline).toLocaleDateString() : 'Sem prazo'}
+                                                    </span>
+                                                    {isPrivate ? (
+                                                        <span className="bg-gray-100 px-2 py-0.5 rounded text-gray-700">Privada</span>
+                                                    ) : (
+                                                        <>
+                                                            <span className="flex items-center gap-1">
+                                                                <ArrowRight size={14} /> De: <strong>{users.find(u => u.id === task.creatorId)?.name.split(' ')[0]}</strong>
+                                                            </span>
+                                                            <span className="flex items-center gap-1">
+                                                                <UserIcon size={14} /> Para: <strong>{users.find(u => u.id === task.assigneeId)?.name}</strong>
+                                                            </span>
+                                                        </>
+                                                    )}
+                                                    <span className="flex items-center gap-1">
+                                                        <MessageSquare size={14} /> {task.comments?.length || 0} Comentários
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <div className="mt-4 md:mt-0 md:ml-6 flex items-center justify-end">
+                                                <ChevronRight size={24} className="text-gray-300 group-hover:text-primary-500 group-hover:translate-x-1 transition-all" />
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
+
+                    {overdueTasks.length === 0 && pendingTasks.length === 0 && (
+                        <div className="text-center py-12 text-gray-500 bg-white rounded-lg border border-dashed border-gray-300">
+                            Você não possui tarefas ativas.
+                        </div>
+                    )}
+                </>
+            ) : (
+                <div className="grid grid-cols-1 gap-4">
+                    {completedTasks.length === 0 && (
+                        <div className="text-center py-12 text-gray-500 bg-white rounded-lg border border-dashed border-gray-300">
+                            Nenhuma tarefa concluída.
+                        </div>
+                    )}
+                    {completedTasks.map(task => {
+                        const isCreator = currentUser?.id === task.creatorId;
+                        const isAssignee = currentUser?.id === task.assigneeId;
+                        const isPrivate = !task.assigneeId;
+
+                        return (
+                            <div key={task.id} className="card-premium stagger-item p-5 flex flex-col md:flex-row justify-between cursor-pointer group" onClick={() => setSelectedTask(task)}>
+                                <div className="flex-1">
+                                    <div className="flex items-center space-x-3 mb-2">
+                                        <h3 className="font-bold text-lg text-gray-900">{task.title}</h3>
+                                        <span className={`badge text-xs px-2 py-1 rounded font-medium transition-transform group-hover:scale-110 ${task.priority === 'Alta' ? 'badge-error' :
+                                            task.priority === 'Média' ? 'bg-yellow-100 text-yellow-800' :
+                                                'bg-green-100 text-green-800'
+                                            }`}>
+                                            {task.priority}
+                                        </span>
+                                        <span className="badge text-xs px-2 py-1 rounded font-medium bg-green-100 text-green-800">
+                                            Concluída
+                                        </span>
+                                    </div>
+                                    <p className="text-sm text-gray-600 line-clamp-2 mb-3">{task.description}</p>
+
+                                    <div className="flex flex-wrap items-center gap-4 text-xs text-gray-500">
+                                        <span className="flex items-center gap-1">
+                                            <Clock size={14} /> Prazo: {task.deadline ? new Date(task.deadline).toLocaleDateString() : 'Sem prazo'}
+                                        </span>
+                                        {isPrivate ? (
+                                            <span className="bg-gray-100 px-2 py-0.5 rounded text-gray-700">Privada</span>
+                                        ) : (
+                                            <>
+                                                <span className="flex items-center gap-1">
+                                                    <ArrowRight size={14} /> De: <strong>{users.find(u => u.id === task.creatorId)?.name.split(' ')[0]}</strong>
+                                                </span>
+                                                <span className="flex items-center gap-1">
+                                                    <UserIcon size={14} /> Para: <strong>{users.find(u => u.id === task.assigneeId)?.name}</strong>
+                                                </span>
+                                            </>
+                                        )}
+                                        <span className="flex items-center gap-1">
+                                            <MessageSquare size={14} /> {task.comments?.length || 0} Comentários
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div className="mt-4 md:mt-0 md:ml-6 flex items-center justify-end">
+                                    <ChevronRight size={24} className="text-gray-300 group-hover:text-primary-500 group-hover:translate-x-1 transition-all" />
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
 
             {/* --- DETAILS & COMMENTS MODAL --- */}
             {selectedTask && (

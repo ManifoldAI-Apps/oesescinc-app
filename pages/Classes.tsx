@@ -837,7 +837,15 @@ export const ClassesPage: React.FC = () => {
 
                     return (
                         <div key={cls.id} className="card-premium flex flex-col h-full group">
-                            <div className="p-6 flex-1 cursor-pointer" onClick={() => { setSelectedClass(cls); setView('details'); }}>
+                            <div className="p-6 flex-1 cursor-pointer" onClick={() => {
+                                if (cls && cls.id && cls.schedule) {
+                                    setSelectedClass(cls);
+                                    setView('details');
+                                } else {
+                                    console.error('Invalid class data:', cls);
+                                    alert('Erro ao carregar dados da turma. Por favor, tente novamente.');
+                                }
+                            }}>
                                 <div className="flex justify-between items-start">
                                     <h3 className="text-lg font-bold text-gray-900">{cls.name}</h3>
                                     <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">{course?.type}</span>
