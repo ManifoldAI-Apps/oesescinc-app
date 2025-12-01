@@ -2,12 +2,13 @@
 import React, { useState } from 'react';
 import { useStore } from '../context/AppStore';
 import { User, UserRole, UNIFORM_SIZES, SHOE_SIZES } from '../types';
-import { Plus, Search, Filter, X, Trash2 } from 'lucide-react';
+import { Plus, Search, Filter, X, Trash2, Edit2 } from 'lucide-react';
 import { formatCPF } from '../utils/formatters';
 
 export const UsersPage: React.FC = () => {
-  const { users, addUser, deleteUser, currentUser } = useStore();
+  const { users, addUser, updateUser, deleteUser, currentUser } = useStore();
   const [showModal, setShowModal] = useState(false);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
   // Verificar se o usuário pode criar novos usuários
@@ -21,6 +22,7 @@ export const UsersPage: React.FC = () => {
   const [newUser, setNewUser] = useState<Partial<User>>({
     role: UserRole.INSTRUTOR,
     base: '',
+    password: '123',
     uniformSize: { jumpsuit: 'M', shoes: '40', shirt: 'M' },
     ppeSize: { pants: 'M', jacket: 'M', gloves: 'M', boots: '40' }
   });
@@ -29,25 +31,62 @@ export const UsersPage: React.FC = () => {
     e.preventDefault();
     if (!currentUser) return;
 
-    const user: User = {
-      id: Math.random().toString(36).substr(2, 9),
-      name: newUser.name || '',
-      cpf: newUser.cpf || '',
-      role: newUser.role as UserRole,
-      email: newUser.email || '',
-      phone: newUser.phone || '',
-      birthDate: newUser.birthDate || '',
-      registrationDate: new Date().toISOString().split('T')[0],
-      createdBy: currentUser.name,
-      base: newUser.base,
-      uniformSize: newUser.uniformSize as any,
-      ppeSize: newUser.ppeSize as any,
-      password: '123' // Default
-    };
+    if (editingUser) {
+      // Update existing user
+      const updatedUser: User = {
+        ...editingUser,
+        name: newUser.name || editingUser.name,
+        cpf: newUser.cpf || editingUser.cpf,
+        role: newUser.role as UserRole,
+        email: newUser.email || editingUser.email,
+        phone: newUser.phone || editingUser.phone,
+        birthDate: newUser.birthDate || editingUser.birthDate,
+        base: newUser.base,
+        uniformSize: newUser.uniformSize as any,
+        ppeSize: newUser.ppeSize as any,
+        password: newUser.password || editingUser.password
+      };
+      updateUser(updatedUser);
+    } else {
+      // Create new user
+      const user: User = {
+        id: Math.random().toString(36).substr(2, 9),
+        name: newUser.name || '',
+        cpf: newUser.cpf || '',
+        role: newUser.role as UserRole,
+        email: newUser.email || '',
+        phone: newUser.phone || '',
+        birthDate: newUser.birthDate || '',
+        registrationDate: new Date().toISOString().split('T')[0],
+        createdBy: currentUser.name,
+        base: newUser.base,
+        uniformSize: newUser.uniformSize as any,
+        ppeSize: newUser.ppeSize as any,
+        password: newUser.password || '123'
+      };
+      addUser(user);
+    }
 
-    addUser(user);
     setShowModal(false);
-    setNewUser({ role: UserRole.INSTRUTOR, base: '', uniformSize: { jumpsuit: 'M', shoes: '40', shirt: 'M' }, ppeSize: { pants: 'M', jacket: 'M', gloves: 'M', boots: '40' } });
+    setEditingUser(null);
+    setNewUser({ role: UserRole.INSTRUTOR, base: '', password: '123', uniformSize: { jumpsuit: 'M', shoes: '40', shirt: 'M' }, ppeSize: { pants: 'M', jacket: 'M', gloves: 'M', boots: '40' } });
+  };
+
+  const handleEdit = (user: User) => {
+    setEditingUser(user);
+    setNewUser({
+      name: user.name,
+      cpf: user.cpf,
+      role: user.role,
+      email: user.email,
+      phone: user.phone,
+      birthDate: user.birthDate,
+      base: user.base,
+      password: user.password,
+      uniformSize: user.uniformSize,
+      ppeSize: user.ppeSize
+    });
+    setShowModal(true);
   };
 
   const handleDelete = async (id: string) => {
@@ -148,9 +187,22 @@ export const UsersPage: React.FC = () => {
                     <span className="text-green-600 text-sm font-medium">Ativo</span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button onClick={() => handleDelete(user.id)} className="text-red-600 hover:text-red-900 hover:scale-110 transition-all duration-200">
-                      <Trash2 size={18} />
-                    </button>
+                    <div className="flex items-center justify-end gap-2">
+                      <button
+                        onClick={() => handleEdit(user)}
+                        className="text-blue-600 hover:text-blue-900 hover:scale-110 transition-all duration-200"
+                        title="Editar usuário"
+                      >
+                        <Edit2 size={18} />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(user.id)}
+                        className="text-red-600 hover:text-red-900 hover:scale-110 transition-all duration-200"
+                        title="Excluir usuário"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -164,8 +216,10 @@ export const UsersPage: React.FC = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col animate-scale-in">
             <div className="p-6 border-b border-gray-100 flex justify-between items-center">
-              <h3 className="text-lg font-bold text-gray-900">Novo Cadastro de Usuário</h3>
-              <button onClick={() => setShowModal(false)}><X size={24} className="text-gray-400 hover:text-gray-600" /></button>
+              <h3 className="text-lg font-bold text-gray-900">{editingUser ? 'Editar Usuário' : 'Novo Cadastro de Usuário'}</h3>
+              <button onClick={() => { setShowModal(false); setEditingUser(null); setNewUser({ role: UserRole.INSTRUTOR, base: '', password: '123', uniformSize: { jumpsuit: 'M', shoes: '40', shirt: 'M' }, ppeSize: { pants: 'M', jacket: 'M', gloves: 'M', boots: '40' } }); }}>
+                <X size={24} className="text-gray-400 hover:text-gray-600" />
+              </button>
             </div>
 
             <div className="flex-1 overflow-y-auto">
@@ -214,6 +268,18 @@ export const UsersPage: React.FC = () => {
                     <label className="block text-sm font-medium text-gray-700">Data de Nascimento</label>
                     <input required type="date" className={inputClass}
                       value={newUser.birthDate || ''} onChange={e => setNewUser({ ...newUser, birthDate: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Senha</label>
+                    <input
+                      required
+                      type="password"
+                      className={inputClass}
+                      value={newUser.password || ''}
+                      onChange={e => setNewUser({ ...newUser, password: e.target.value })}
+                      placeholder="Digite a senha"
+                      minLength={3}
+                    />
                   </div>
                 </div>
 
@@ -274,8 +340,8 @@ export const UsersPage: React.FC = () => {
                 </div>
 
                 <div className="flex justify-end pt-4 border-t border-gray-100">
-                  <button type="button" onClick={() => setShowModal(false)} className="mr-3 px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">Cancelar</button>
-                  <button type="submit" className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700">Salvar Usuário</button>
+                  <button type="button" onClick={() => { setShowModal(false); setEditingUser(null); setNewUser({ role: UserRole.INSTRUTOR, base: '', password: '123', uniformSize: { jumpsuit: 'M', shoes: '40', shirt: 'M' }, ppeSize: { pants: 'M', jacket: 'M', gloves: 'M', boots: '40' } }); }} className="mr-3 px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">Cancelar</button>
+                  <button type="submit" className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700">{editingUser ? 'Atualizar Usuário' : 'Salvar Usuário'}</button>
                 </div>
               </form>
             </div>
