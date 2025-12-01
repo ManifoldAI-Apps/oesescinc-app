@@ -22,7 +22,7 @@ export const EvaluationsPage: React.FC = () => {
     console.log('  - All students in store:', students);
     console.log('  - Students count:', students.length);
 
-    const classStudents = selectedClass ? students.filter(s => selectedClass.studentIds.includes(s.id)) : [];
+    const classStudents = selectedClass ? students.filter(s => s.classId === selectedClass.id) : [];
     console.log('  - Filtered classStudents:', classStudents);
     console.log('  - Filtered count:', classStudents.length);
 
