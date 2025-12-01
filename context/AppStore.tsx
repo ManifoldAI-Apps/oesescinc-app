@@ -383,6 +383,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             console.warn('VITE_SUPABASE_URL:', import.meta.env.VITE_SUPABASE_URL || 'NOT SET');
             console.warn('VITE_SUPABASE_ANON_KEY:', import.meta.env.VITE_SUPABASE_ANON_KEY ? 'SET' : 'NOT SET');
         }
+
+        // ALWAYS set loading to false, regardless of Supabase config
         setLoading(false);
     };
 

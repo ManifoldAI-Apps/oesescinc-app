@@ -775,9 +775,10 @@ export const ClassesPage: React.FC = () => {
     }
 
     // List View
+    console.log('Rendering List View. Classes count:', classes.length);
     return (
-        <div className="space-y-6 animate-fade-in">
-            <div className="flex justify-between items-center animate-slide-down">
+        <div className="space-y-6">
+            <div className="flex justify-between items-center">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900">Gerenciamento de Turmas</h1>
                     <p className="text-gray-500 mt-1">Gerencie turmas e cronogramas</p>
@@ -792,18 +793,13 @@ export const ClassesPage: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {classes.length === 0 && (
-                    <div className="col-span-full text-center py-12 bg-white rounded-lg border border-dashed border-gray-300">
-                        <p className="text-gray-500">Nenhuma turma cadastrada.</p>
-                        <button onClick={() => setView('create')} className="mt-2 text-primary-600 font-medium hover:underline">Criar primeira turma</button>
-                    </div>
-                )}
                 {classes.map(cls => {
+                    console.log('Rendering class card:', cls.name);
                     const course = courses.find(c => c.id === cls.courseId);
                     const status = getStatus(cls);
 
                     return (
-                        <div key={cls.id} className="card-premium stagger-item flex flex-col h-full group">
+                        <div key={cls.id} className="card-premium flex flex-col h-full group">
                             <div className="p-6 flex-1 cursor-pointer" onClick={() => { setSelectedClass(cls); setView('details'); }}>
                                 <div className="flex justify-between items-start">
                                     <h3 className="text-lg font-bold text-gray-900">{cls.name}</h3>
