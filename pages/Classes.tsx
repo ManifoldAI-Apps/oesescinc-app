@@ -775,7 +775,6 @@ export const ClassesPage: React.FC = () => {
     }
 
     // List View
-    console.log('Rendering List View. Classes count:', classes.length);
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center">
@@ -794,7 +793,6 @@ export const ClassesPage: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {classes.map(cls => {
-                    console.log('Rendering class card:', cls.name);
                     const course = courses.find(c => c.id === cls.courseId);
                     const status = getStatus(cls);
 
