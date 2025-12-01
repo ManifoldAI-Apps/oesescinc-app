@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { useStore } from '../context/AppStore';
 import { PaymentRecord, UserRole } from '../types';
@@ -111,6 +110,7 @@ export const FinancePage: React.FC = () => {
                 subject: assignment.type,
                 modality: 'Operacional',
                 days: assignment.days,
+                hours: assignment.days * 8, // Assuming 8h work day for setup/teardown
                 rate: assignment.rate,
                 value: assignment.totalValue,
                 status: isPaid ? 'Pago' : 'Pendente',
@@ -167,7 +167,6 @@ export const FinancePage: React.FC = () => {
                 name: string,
                 role: string,
                 totalHours: number,
-                totalDays: number,
                 totalValue: number,
                 paidValue: number,
                 pendingValue: number,
@@ -183,7 +182,6 @@ export const FinancePage: React.FC = () => {
                     name: item.instructorName,
                     role: item.instructorRole,
                     totalHours: 0,
-                    totalDays: 0,
                     totalValue: 0,
                     paidValue: 0,
                     pendingValue: 0,
@@ -192,7 +190,6 @@ export const FinancePage: React.FC = () => {
                 };
             }
             statsMap[item.instructorId].totalHours += item.hours ?? 0;
-            statsMap[item.instructorId].totalDays += item.days ?? 0;
             statsMap[item.instructorId].totalValue += item.value;
             if (item.status === 'Pago') {
                 statsMap[item.instructorId].paidValue += item.value;
@@ -267,7 +264,7 @@ export const FinancePage: React.FC = () => {
     };
 
     const handleExportCSV = () => {
-        const headers = ["Data", "Tipo", "Instrutor", "Turma", "Materia", "Modalidade", "Horas/Dias", "Valor/Hora", "Total", "Status"];
+        const headers = ["Data", "Tipo", "Instrutor", "Turma", "Materia", "Modalidade", "Horas", "Valor/Hora", "Total", "Status"];
         const rows = filteredItems.map(item => [
             new Date(item.date).toLocaleDateString(),
             item.type,
@@ -275,7 +272,7 @@ export const FinancePage: React.FC = () => {
             item.className,
             item.subject,
             item.modality,
-            item.hours ? `${item.hours}h` : `${item.days} dias`,
+            `${item.hours}h`,
             item.rate.toString().replace('.', ','),
             item.value.toString().replace('.', ','),
             item.status
@@ -362,7 +359,7 @@ export const FinancePage: React.FC = () => {
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Função</th>
                                     <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Part. em Turmas</th>
                                     <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Total Aulas</th>
-                                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Horas / Dias</th>
+                                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Horas Totais</th>
                                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Valor Recebido</th>
                                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Valor a Receber</th>
                                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Total Acumulado</th>
@@ -385,9 +382,7 @@ export const FinancePage: React.FC = () => {
                                             {stat.totalEvents}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-center font-bold text-blue-600">
-                                            {stat.totalHours > 0 && <span>{stat.totalHours}h</span>}
-                                            {stat.totalHours > 0 && stat.totalDays > 0 && <span className="mx-1">+</span>}
-                                            {stat.totalDays > 0 && <span>{stat.totalDays}d</span>}
+                                            {stat.totalHours}h
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-right font-bold text-green-600">
                                             R$ {stat.paidValue.toFixed(2)}
@@ -504,7 +499,7 @@ export const FinancePage: React.FC = () => {
                                 {!isInstructor && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Instrutor</th>}
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Turma / Matéria</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Modalidade</th>
-                                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Horas/Dias</th>
+                                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Horas</th>
                                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Valor Hora</th>
                                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Total</th>
                                 <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Status</th>
@@ -564,7 +559,7 @@ export const FinancePage: React.FC = () => {
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-center font-medium text-gray-700">
-                                            {log.hours ? `${log.hours} h` : `${log.days} dias`}
+                                            {log.hours} h
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-500">
                                             R$ {log.rate.toFixed(2)}

@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useStore } from '../context/AppStore';
 import { ClassGroup, UserRole, ClassScheduleItem, Course, Subject, CourseType, User } from '../types';
-import { Plus, Calendar as CalendarIcon, Clock, ChevronRight, FileText, Download, Save, Trash2, X, ChevronDown, Check, RefreshCw } from 'lucide-react';
+import { Plus, Calendar as CalendarIcon, Clock, ChevronRight, FileText, Download, Save, Trash2, X, ChevronDown, Check, RefreshCw, Edit } from 'lucide-react';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import { formatDate } from '../utils/dateUtils';
@@ -88,7 +88,10 @@ export const ClassesPage: React.FC = () => {
     console.log('  - Users from store:', users);
 
     const [view, setView] = useState<'list' | 'create' | 'details'>('list');
+
     const [selectedClass, setSelectedClass] = useState<ClassGroup | null>(null);
+    const [isEditing, setIsEditing] = useState(false);
+    const isInitialEditLoad = useRef(false);
 
     // Swap Modal State
     const [swapModalOpen, setSwapModalOpen] = useState(false);
@@ -126,6 +129,8 @@ export const ClassesPage: React.FC = () => {
 
     const inputClass = "appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm bg-white text-gray-900";
 
+    const canEdit = currentUser?.role === UserRole.GESTOR || currentUser?.role === UserRole.COORDENADOR;
+
     // Helper to get local date without timezone issues
     const getLocalDate = (dateStr: string) => {
         if (!dateStr) return new Date();
@@ -136,6 +141,10 @@ export const ClassesPage: React.FC = () => {
     // Effect to auto-calculate schedule when parameters change
     useEffect(() => {
         if (view === 'create') {
+            if (isEditing && isInitialEditLoad.current) {
+                isInitialEditLoad.current = false;
+                return;
+            }
             calculateSchedulePreview();
         }
     }, [
@@ -298,7 +307,68 @@ export const ClassesPage: React.FC = () => {
     };
 
     const updatePreviewItem = (id: string, field: keyof ClassScheduleItem, value: any) => {
-        setPreviewSchedule(prev => prev.map(item => item.id === id ? { ...item, [field]: value } : item));
+        if (field === 'date') {
+            handleDateChange(id, value);
+        } else {
+            setPreviewSchedule(prev => prev.map(item => item.id === id ? { ...item, [field]: value } : item));
+        }
+    };
+
+    const handleDateChange = (id: string, newDateStr: string) => {
+        const index = previewSchedule.findIndex(item => item.id === id);
+        if (index === -1) return;
+
+        const oldDate = getLocalDate(previewSchedule[index].date);
+        const newDate = getLocalDate(newDateStr);
+        const diffTime = newDate.getTime() - oldDate.getTime();
+
+        if (diffTime === 0) return;
+
+        const updatedSchedule = [...previewSchedule];
+        // Update current item
+        updatedSchedule[index] = { ...updatedSchedule[index], date: newDateStr };
+
+        // Update subsequent items
+        for (let i = index + 1; i < updatedSchedule.length; i++) {
+            const currentItemDate = getLocalDate(updatedSchedule[i].date);
+            const nextDate = new Date(currentItemDate.getTime() + diffTime);
+            updatedSchedule[i] = { ...updatedSchedule[i], date: nextDate.toISOString().split('T')[0] };
+        }
+        setPreviewSchedule(updatedSchedule);
+    };
+
+    const handleEditClass = (cls: ClassGroup) => {
+        setIsEditing(true);
+        isInitialEditLoad.current = true;
+        setSelectedClass(cls);
+
+        setNewClass({
+            courseId: cls.courseId,
+            includeSaturday: cls.includeSaturday,
+            includeSunday: cls.includeSunday,
+            hoursPerDay: cls.hoursPerDay,
+            theoryStartDate: cls.theoryStartDate,
+            practiceStartDate: cls.practiceStartDate,
+            registrationNumber: cls.registrationNumber,
+            capBa: cls.capBa
+        });
+
+        // Parse name for number/year (Assuming format "Name Number/Year")
+        // Example: "CBA-2 20/2024"
+        const parts = cls.name.split(' ');
+        const lastPart = parts[parts.length - 1]; // "20/2024"
+        if (lastPart && lastPart.includes('/')) {
+            const [num, year] = lastPart.split('/');
+            setClassNumber(num);
+            setClassYear(year);
+        } else {
+            // Fallback if format is different
+            setClassNumber('');
+            setClassYear(new Date().getFullYear().toString());
+        }
+
+        setPreviewSchedule(cls.schedule);
+        setView('create');
     };
 
     const handleSaveClass = () => {
@@ -315,13 +385,13 @@ export const ClassesPage: React.FC = () => {
         const minDate = new Date(Math.min(...dates));
         const maxDate = new Date(Math.max(...dates));
 
-        const cls: ClassGroup = {
-            id: Math.random().toString(36).substr(2, 9),
+        const clsData: ClassGroup = {
+            id: isEditing && selectedClass ? selectedClass.id : Math.random().toString(36).substr(2, 9),
             name: className,
             startDate: minDate.toISOString().split('T')[0],
             endDate: maxDate.toISOString().split('T')[0],
             courseId: newClass.courseId!,
-            studentIds: [],
+            studentIds: isEditing && selectedClass ? selectedClass.studentIds : [],
             daysOfWeek: [],
             includeWeekends: false,
             includeSaturday: newClass.includeSaturday!,
@@ -334,9 +404,15 @@ export const ClassesPage: React.FC = () => {
             schedule: previewSchedule
         };
 
-        addClass(cls);
+        if (isEditing && selectedClass) {
+            updateClass(clsData);
+        } else {
+            addClass(clsData);
+        }
+
         setView('list');
         resetForm();
+        setIsEditing(false);
     };
 
     const resetForm = () => {
@@ -564,8 +640,8 @@ export const ClassesPage: React.FC = () => {
             <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
                 <div className="bg-white rounded-xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-y-auto animate-scale-in">
                     <div className="p-6 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white z-10 rounded-t-xl">
-                        <h2 className="text-xl font-bold text-gray-900">Nova Turma</h2>
-                        <button onClick={() => { setView('list'); resetForm(); }} className="text-gray-400 hover:text-gray-600 transition-colors">
+                        <h2 className="text-xl font-bold text-gray-900">{isEditing ? 'Editar Turma' : 'Nova Turma'}</h2>
+                        <button onClick={() => { setView('list'); resetForm(); setIsEditing(false); }} className="text-gray-400 hover:text-gray-600 transition-colors">
                             <X size={24} />
                         </button>
                     </div>
@@ -612,7 +688,7 @@ export const ClassesPage: React.FC = () => {
                                         maxLength={4}
                                         className={inputClass}
                                         value={newClass.registrationNumber}
-                                        onChange={e => setNewClass({ ...newClass, registrationNumber: e.target.value })}
+                                        onChange={e => setNewClass({ ...newClass, registrationNumber: e.target.value.toUpperCase() })}
                                     />
                                 </div>
 
@@ -624,7 +700,7 @@ export const ClassesPage: React.FC = () => {
                                             maxLength={4}
                                             className={inputClass}
                                             value={newClass.capBa}
-                                            onChange={e => setNewClass({ ...newClass, capBa: e.target.value })}
+                                            onChange={e => setNewClass({ ...newClass, capBa: e.target.value.toUpperCase() })}
                                         />
                                     </div>
                                 )}
@@ -819,13 +895,15 @@ export const ClassesPage: React.FC = () => {
                         {availableYears.map(year => <option key={year} value={year}>{year}</option>)}
                     </select>
 
-                    <button
-                        onClick={() => setView('create')}
-                        className="btn-premium flex items-center space-x-2 bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white px-6 py-2 rounded-lg shadow-md transition-all duration-200"
-                    >
-                        <Plus size={20} />
-                        <span className="font-semibold">Nova Turma</span>
-                    </button>
+                    {canEdit && (
+                        <button
+                            onClick={() => setView('create')}
+                            className="btn-premium flex items-center space-x-2 bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white px-6 py-2 rounded-lg shadow-md transition-all duration-200"
+                        >
+                            <Plus size={20} />
+                            <span className="font-semibold">Nova Turma</span>
+                        </button>
+                    )}
                 </div>
             </div>
 
@@ -880,18 +958,27 @@ export const ClassesPage: React.FC = () => {
                                         <Download size={18} />
                                     </button>
                                     {(currentUser?.role === UserRole.GESTOR || currentUser?.role === UserRole.COORDENADOR) && (
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                if (window.confirm(`Tem certeza que deseja excluir a turma "${cls.name}"? Esta ação não pode ser desfeita.`)) {
-                                                    deleteClass(cls.id);
-                                                }
-                                            }}
-                                            className="text-gray-400 hover:text-red-600 p-1 rounded-full hover:bg-red-50 transition"
-                                            title="Excluir Turma"
-                                        >
-                                            <Trash2 size={18} />
-                                        </button>
+                                        <>
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); handleEditClass(cls); }}
+                                                className="text-blue-500 hover:text-blue-700 p-1 rounded-full hover:bg-blue-50 transition"
+                                                title="Editar Turma"
+                                            >
+                                                <Edit size={18} />
+                                            </button>
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    if (window.confirm(`Tem certeza que deseja excluir a turma "${cls.name}"? Esta ação não pode ser desfeita.`)) {
+                                                        deleteClass(cls.id);
+                                                    }
+                                                }}
+                                                className="text-gray-400 hover:text-red-600 p-1 rounded-full hover:bg-red-50 transition"
+                                                title="Excluir Turma"
+                                            >
+                                                <Trash2 size={18} />
+                                            </button>
+                                        </>
                                     )}
                                 </div>
                             </div>

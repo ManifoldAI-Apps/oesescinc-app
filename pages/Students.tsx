@@ -2,7 +2,7 @@
 import React, { useState, useMemo } from 'react';
 import { useStore } from '../context/AppStore';
 import { Student, CourseType, EnrollmentStatus } from '../types';
-import { Plus, Pencil, X, Trash2 } from 'lucide-react';
+import { Plus, Pencil, X, Trash2, Download } from 'lucide-react';
 import { formatCPF } from '../utils/formatters';
 import { formatDate } from '../utils/dateUtils';
 
@@ -203,6 +203,31 @@ export const StudentsPage: React.FC = () => {
         return matchesSearch && matchesClass && matchesYear;
     });
 
+    const handleExportCSV = () => {
+        const headers = ['Matricula', 'Nome', 'Turma', 'Status', 'CPF', 'Registro', 'CAP-BA', 'Final Teorica', 'Final Pratica', 'Nota Final'];
+        const csvContent = [
+            headers.join(','),
+            ...filtered.map(s => [
+                `"${s.matricula}"`,
+                `"${s.name}"`,
+                `"${s.className}"`,
+                `"${s.enrollmentStatus}"`,
+                `"${s.cpf}"`,
+                `"${s.registro}"`,
+                `"${s.capCode}"`,
+                s.finalTheory?.toFixed(1) || '-',
+                s.finalPractical?.toFixed(1) || '-',
+                s.finalGrade?.toFixed(1) || '-'
+            ].join(','))
+        ].join('\n');
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'alunos.csv';
+        link.click();
+    };
+
     const inputClass = "appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm bg-white text-gray-900";
 
     return (
@@ -212,6 +237,13 @@ export const StudentsPage: React.FC = () => {
                     <h1 className="text-3xl font-bold text-gray-900">Alunos</h1>
                     <p className="text-gray-500 mt-1">Gerencie os alunos e suas matrículas</p>
                 </div>
+                <button
+                    onClick={handleExportCSV}
+                    className="btn-premium flex items-center space-x-2 bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 px-4 py-3 rounded-lg shadow-sm transition-all duration-200 mr-2"
+                >
+                    <Download size={20} />
+                    <span className="font-semibold">Exportar CSV</span>
+                </button>
                 <button
                     onClick={() => setShowModal(true)}
                     className="btn-premium flex items-center space-x-2 bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white px-6 py-3 rounded-lg shadow-md transition-all duration-200"
@@ -375,7 +407,7 @@ export const StudentsPage: React.FC = () => {
 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">Nome Completo</label>
-                                    <input required className={inputClass} value={studentForm.name || ''} onChange={e => setStudentForm({ ...studentForm, name: e.target.value })} />
+                                    <input required className={inputClass} value={studentForm.name || ''} onChange={e => setStudentForm({ ...studentForm, name: e.target.value.toUpperCase() })} />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">CPF</label>
@@ -390,11 +422,11 @@ export const StudentsPage: React.FC = () => {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">RG</label>
-                                    <input className={inputClass} value={studentForm.rg || ''} onChange={e => setStudentForm({ ...studentForm, rg: e.target.value })} />
+                                    <input className={inputClass} value={studentForm.rg || ''} onChange={e => setStudentForm({ ...studentForm, rg: e.target.value.toUpperCase() })} />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">Orgão Emissor</label>
-                                    <input className={inputClass} value={studentForm.rgIssuer || ''} onChange={e => setStudentForm({ ...studentForm, rgIssuer: e.target.value })} />
+                                    <input className={inputClass} value={studentForm.rgIssuer || ''} onChange={e => setStudentForm({ ...studentForm, rgIssuer: e.target.value.toUpperCase() })} />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">Data Nascimento</label>
@@ -410,23 +442,23 @@ export const StudentsPage: React.FC = () => {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">Naturalidade</label>
-                                    <input className={inputClass} value={studentForm.origin || ''} onChange={e => setStudentForm({ ...studentForm, origin: e.target.value })} />
+                                    <input className={inputClass} value={studentForm.origin || ''} onChange={e => setStudentForm({ ...studentForm, origin: e.target.value.toUpperCase() })} />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">Endereço</label>
-                                    <input className={inputClass} value={studentForm.address || ''} onChange={e => setStudentForm({ ...studentForm, address: e.target.value })} />
+                                    <input className={inputClass} value={studentForm.address || ''} onChange={e => setStudentForm({ ...studentForm, address: e.target.value.toUpperCase() })} />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">Nacionalidade</label>
-                                    <input className={inputClass} value={studentForm.nationality || ''} onChange={e => setStudentForm({ ...studentForm, nationality: e.target.value })} />
+                                    <input className={inputClass} value={studentForm.nationality || ''} onChange={e => setStudentForm({ ...studentForm, nationality: e.target.value.toUpperCase() })} />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">Nome da Mãe</label>
-                                    <input className={inputClass} value={studentForm.motherName || ''} onChange={e => setStudentForm({ ...studentForm, motherName: e.target.value })} />
+                                    <input className={inputClass} value={studentForm.motherName || ''} onChange={e => setStudentForm({ ...studentForm, motherName: e.target.value.toUpperCase() })} />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">Nome do Pai</label>
-                                    <input className={inputClass} value={studentForm.fatherName || ''} onChange={e => setStudentForm({ ...studentForm, fatherName: e.target.value })} />
+                                    <input className={inputClass} value={studentForm.fatherName || ''} onChange={e => setStudentForm({ ...studentForm, fatherName: e.target.value.toUpperCase() })} />
                                 </div>
                             </div>
 

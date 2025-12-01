@@ -36,9 +36,9 @@ export const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-primary-50 to-blue-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div className="min-h-screen bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-orange-100 via-gray-50 to-white flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
       {/* Futuristic Floating Particles */}
-      <div className="absolute inset-0 overflow-hidden">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="floating-particle" style={{ left: '10%', animationDelay: '0s' }}></div>
         <div className="floating-particle" style={{ left: '20%', animationDelay: '2s' }}></div>
         <div className="floating-particle" style={{ left: '30%', animationDelay: '4s' }}></div>
@@ -49,11 +49,13 @@ export const Login: React.FC = () => {
         <div className="floating-particle" style={{ left: '80%', animationDelay: '4.5s' }}></div>
         <div className="floating-particle" style={{ left: '90%', animationDelay: '1.5s' }}></div>
       </div>
-      <div className="absolute inset-0 bg-gradient-to-t from-transparent via-primary-500/5 to-transparent animate-pulse-slow"></div>
 
-      <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10 animate-slide-down">
-        <h2 className="mt-6 text-center text-4xl font-extrabold text-gray-900">
-          OE-SESCINC Med+ Group
+      <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10 animate-slide-down flex flex-col items-center">
+        <div className="bg-white p-3 rounded-2xl shadow-lg mb-4">
+          <Shield size={48} className="text-primary-600 fill-current" />
+        </div>
+        <h2 className="text-center text-4xl font-extrabold text-gray-900 tracking-tight">
+          OE-SESCINC <span className="text-primary-600">Med+ Group</span>
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600 font-medium">
           Sistema de Gestão de Ensino
@@ -61,10 +63,13 @@ export const Login: React.FC = () => {
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md relative z-10 animate-scale-in">
-        <div className="card-premium py-8 px-4 sm:px-10 backdrop-blur-sm bg-white/95">
+        <div className="bg-white/80 backdrop-blur-xl py-8 px-4 sm:px-10 rounded-2xl shadow-2xl border border-white/50 relative overflow-hidden">
+          {/* Decorative top border */}
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary-500 via-orange-400 to-primary-600"></div>
+
           <form className="space-y-6" onSubmit={handleFormSubmit}>
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-1">
                 Endereço de E-mail
               </label>
               <div className="mt-1">
@@ -76,20 +81,21 @@ export const Login: React.FC = () => {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="input-premium appearance-none block w-full px-3 py-2 rounded-md shadow-sm placeholder-gray-400 sm:text-sm bg-white text-gray-900"
+                  className="appearance-none block w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all duration-200 sm:text-sm"
+                  placeholder="seu@email.com"
                 />
               </div>
             </div>
 
             <div>
-              <div className="flex justify-between items-center">
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <div className="flex justify-between items-center mb-1">
+                <label htmlFor="password" className="block text-sm font-semibold text-gray-700">
                   Senha
                 </label>
                 <button
                   type="button"
                   onClick={handleForgotPassword}
-                  className="text-sm font-medium text-primary-600 hover:text-primary-500 transition-colors"
+                  className="text-xs font-medium text-primary-600 hover:text-primary-500 transition-colors"
                 >
                   Esqueceu sua senha?
                 </button>
@@ -103,11 +109,12 @@ export const Login: React.FC = () => {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="input-premium appearance-none block w-full px-3 py-2 rounded-md shadow-sm placeholder-gray-400 sm:text-sm bg-white text-gray-900 pr-10"
+                  className="appearance-none block w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all duration-200 sm:text-sm pr-10 no-uppercase"
+                  placeholder="••••••••"
                 />
                 <button
                   type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 cursor-pointer transition-colors"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-primary-600 cursor-pointer transition-colors"
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
@@ -116,7 +123,8 @@ export const Login: React.FC = () => {
             </div>
 
             {error && (
-              <div className="animate-slide-down text-red-600 text-sm text-center bg-red-50 p-3 rounded-lg border border-red-200 shadow-sm">
+              <div className="animate-slide-down flex items-center gap-2 text-red-600 text-sm bg-red-50 p-4 rounded-xl border border-red-100">
+                <Shield size={16} className="flex-shrink-0" />
                 {error}
               </div>
             )}
@@ -124,16 +132,16 @@ export const Login: React.FC = () => {
             <div>
               <button
                 type="submit"
-                className="btn-premium w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all duration-200"
+                className="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-xl shadow-lg shadow-primary-500/30 text-sm font-bold text-white bg-gradient-to-r from-primary-600 to-orange-500 hover:from-primary-700 hover:to-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transform hover:-translate-y-0.5 transition-all duration-200"
               >
                 Entrar no Sistema
               </button>
             </div>
           </form>
 
-          <div className="mt-6 text-center">
-            <p className="text-xs text-gray-500">
-              Versão 2.0 • Desenvolvido com ❤️
+          <div className="mt-8 pt-6 border-t border-gray-100 text-center">
+            <p className="text-xs text-gray-400 font-medium">
+              Versão 2.0 • Desenvolvido por <span className="text-primary-600 font-bold">Manifold IA</span>
             </p>
           </div>
         </div>

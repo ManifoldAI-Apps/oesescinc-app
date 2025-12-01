@@ -286,7 +286,7 @@ export const UsersPage: React.FC = () => {
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Nome Completo</label>
                     <input required type="text" className={inputClass}
-                      value={newUser.name || ''} onChange={e => setNewUser({ ...newUser, name: e.target.value })} />
+                      value={newUser.name || ''} onChange={e => setNewUser({ ...newUser, name: e.target.value.toUpperCase() })} />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700">CPF</label>
@@ -310,7 +310,7 @@ export const UsersPage: React.FC = () => {
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Base (Opcional)</label>
                     <input type="text" className={inputClass} placeholder="Ex: SBGR"
-                      value={newUser.base || ''} onChange={e => setNewUser({ ...newUser, base: e.target.value })} />
+                      value={newUser.base || ''} onChange={e => setNewUser({ ...newUser, base: e.target.value.toUpperCase() })} />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700">E-Mail</label>

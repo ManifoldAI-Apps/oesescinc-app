@@ -512,7 +512,17 @@ export const TasksPage: React.FC = () => {
                                                 onClick={(e) => { e.stopPropagation(); handleStatusChange(selectedTask, 'request_finish'); }}
                                                 className="btn-premium flex-1 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white px-4 py-2 rounded-lg flex justify-center items-center gap-2 shadow-md transition-all duration-200"
                                             >
-                                                <CheckCircle size={18} /> Solicitar Conclusão
+                                                <Send size={18} /> Enviar para Aprovação
+                                            </button>
+                                        )}
+
+                                        {/* Logic for Assigned Tasks - Creator View (Force Finish) */}
+                                        {selectedTask.creatorId === currentUser?.id && selectedTask.assigneeId && selectedTask.status === 'Pendente' && (
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); handleStatusChange(selectedTask, 'finish_private'); }}
+                                                className="btn-premium flex-1 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white px-4 py-2 rounded-lg flex justify-center items-center gap-2 shadow-md transition-all duration-200"
+                                            >
+                                                <CheckCircle size={18} /> Concluir Tarefa
                                             </button>
                                         )}
 
@@ -570,7 +580,7 @@ export const TasksPage: React.FC = () => {
                                         className="input-premium flex-1 appearance-none block w-full px-3 py-2 rounded-md shadow-sm placeholder-gray-400 sm:text-sm bg-white text-gray-900"
                                         placeholder="Escreva um comentário..."
                                         value={commentText}
-                                        onChange={e => setCommentText(e.target.value)}
+                                        onChange={e => setCommentText(e.target.value.toUpperCase())}
                                         onKeyDown={e => e.key === 'Enter' && handleAddComment()}
                                     />
                                     <button
@@ -616,12 +626,12 @@ export const TasksPage: React.FC = () => {
                         <div className="space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Título</label>
-                                <input placeholder="Título da tarefa" className={inputClass} value={newTask.title || ''} onChange={e => setNewTask({ ...newTask, title: e.target.value })} />
+                                <input placeholder="Título da tarefa" className={inputClass} value={newTask.title || ''} onChange={e => setNewTask({ ...newTask, title: e.target.value.toUpperCase() })} />
                             </div>
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
-                                <textarea placeholder="Detalhes da tarefa..." className={`${inputClass} h-24`} value={newTask.description || ''} onChange={e => setNewTask({ ...newTask, description: e.target.value })} />
+                                <textarea placeholder="Detalhes da tarefa..." className={`${inputClass} h-24`} value={newTask.description || ''} onChange={e => setNewTask({ ...newTask, description: e.target.value.toUpperCase() })} />
                                 <button onClick={getAiSuggestion} className="text-xs text-primary-600 hover:underline mt-1 flex items-center gap-1">
                                     ✨ Usar IA para sugerir descrição
                                 </button>

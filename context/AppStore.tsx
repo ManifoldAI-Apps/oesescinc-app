@@ -333,9 +333,9 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                 const { count: classCount } = await supabase.from('classes').select('*', { count: 'exact', head: true });
 
                 // SEED DISABLED - No longer auto-inserting example data
-                // if ((userCount === 0 || courseCount === 0 || classCount === 0)) {
-                //     await seedDatabase();
-                // }
+                if ((userCount === 0 || courseCount === 0 || classCount === 0)) {
+                    await seedDatabase();
+                }
 
                 // Helper to safe fetch WITHOUT fallback to mock data (Exclusive Persistence)
                 const safeFetch = async (table: string, setter: any, mapper?: (data: any) => any) => {

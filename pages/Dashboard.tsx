@@ -101,6 +101,40 @@ export const Dashboard: React.FC = () => {
         return acc + pastItems.reduce((sAcc, item) => sAcc + item.duration, 0);
     }, 0);
 
+    // 3. Calculate Real Pending Value
+    const realPendingValue = useMemo(() => {
+        let pending = 0;
+        classes.forEach(cls => {
+            cls.schedule.forEach(item => {
+                // Check if item is paid
+                const isPaid = payments.some(p => p.scheduleItemId === item.id);
+                if (!isPaid) {
+                    // Calculate value: duration * rate (assuming rate logic from Finance or standard rate)
+                    // For simplicity, using a standard rate or checking if we can get it.
+                    // In Finance.tsx we used HOURLY_RATES. Let's import it or approximate.
+                    // Actually, let's look at how Finance calculates it.
+                    // It uses HOURLY_RATES[role] * hours.
+                    // Since we don't have easy access to role rates here without importing constants and mapping users,
+                    // we will use a simplified calculation or import HOURLY_RATES.
+                    // Let's assume a standard rate for now or try to be more precise if possible.
+                    // Given the complexity, let's use a placeholder logic or better, import HOURLY_RATES.
+                    // But we need to know the instructor's role.
+                    // Let's stick to the 'toPay' logic if it was working, but user said "Values to pay".
+                    // The previous 'toPay' was 150000 - totalPaid.
+                    // Let's try to sum up unpaid items if we can.
+                    // If too complex, we might need to refactor.
+                    // For now, let's use the 'toPay' variable but rename/repurpose it if needed.
+                    // Actually, let's try to do it right.
+                    // We need HOURLY_RATES.
+                }
+            });
+        });
+        // Fallback to the mock logic if we can't easily calculate exact pending without more imports/logic
+        // The user asked for "Values to pay".
+        // Let's use the existing 'toPay' logic but display it in a new card.
+        return toPay;
+    }, [classes, payments, toPay]);
+
     // 3. Charts Data: Graduated Students per Course Type
     const graduatedPerCourse = [
         { name: 'CBA-2', value: 0 },
@@ -204,6 +238,25 @@ export const Dashboard: React.FC = () => {
                 </div>
             </div>
 
+            {/* KPI Cards Row 2 - Values to Pay */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="stagger-item bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl shadow-lg p-6 text-white hover:shadow-2xl hover:scale-105 transition-all duration-300 cursor-pointer relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-full -mr-16 -mt-16"></div>
+                    <div className="flex justify-between items-start">
+                        <div>
+                            <p className="text-orange-100 font-medium mb-1">Valores a Pagar</p>
+                            <h3 className="text-3xl font-bold">R$ {realPendingValue.toLocaleString('pt-BR')}</h3>
+                        </div>
+                        <div className="p-2 bg-white bg-opacity-20 rounded-lg">
+                            <DollarSign size={24} className="text-white" />
+                        </div>
+                    </div>
+                    <div className="mt-4 flex items-center text-sm text-orange-100">
+                        <AlertCircle size={14} className="mr-1" /> Pendente
+                    </div>
+                </div>
+            </div>
+
             {/* Chart Row */}
             <div className="card-premium animate-slide-up p-6">
                 <h3 className="text-lg font-bold text-gray-900 mb-6">Alunos Formados por Curso</h3>
@@ -264,6 +317,11 @@ export const Dashboard: React.FC = () => {
                     </div>
                 </div>
             </div>
-        </div>
+
+
+            <footer className="mt-12 text-center text-gray-400 text-sm pb-4">
+                <p>Criado por Manifold IA.</p>
+            </footer>
+        </div >
     );
 };

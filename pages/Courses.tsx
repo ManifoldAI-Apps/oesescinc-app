@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import { useStore } from '../context/AppStore';
-import { Course, Subject, CourseType } from '../types';
+import { Course, Subject, CourseType, UserRole } from '../types';
 import { Plus, Trash2, Pencil, X, Save, ChevronDown, ChevronUp } from 'lucide-react';
 
 export const CoursesPage: React.FC = () => {
-    const { courses, addCourse, updateCourse, deleteCourse } = useStore();
+    const { courses, addCourse, updateCourse, deleteCourse, currentUser } = useStore();
     const [isCreating, setIsCreating] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editingSubjectId, setEditingSubjectId] = useState<string | null>(null);
     const [expandedCourses, setExpandedCourses] = useState<Set<string>>(new Set());
+
+    const canEdit = currentUser?.role === UserRole.GESTOR || currentUser?.role === UserRole.COORDENADOR;
 
     const [courseForm, setCourseForm] = useState<Partial<Course>>({
         name: '',
@@ -159,7 +161,7 @@ export const CoursesPage: React.FC = () => {
                     <h1 className="text-3xl font-bold text-gray-900">Cursos e Matérias</h1>
                     <p className="text-gray-500 mt-1">Gerencie os cursos e suas disciplinas</p>
                 </div>
-                {!isCreating && (
+                {!isCreating && canEdit && (
                     <button
                         onClick={() => setIsCreating(true)}
                         className="btn-premium flex items-center space-x-2 bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white px-6 py-3 rounded-lg shadow-md transition-all duration-200"
@@ -348,20 +350,24 @@ export const CoursesPage: React.FC = () => {
                                     Total: {course.subjects.reduce((acc, s) => acc + s.hours, 0)} Horas | {course.subjects.length} Matérias
                                 </span>
                                 <div className="flex space-x-2 pl-4 border-l border-gray-300">
-                                    <button
-                                        onClick={() => handleEditClick(course)}
-                                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
-                                        title="Editar Curso"
-                                    >
-                                        <Pencil size={18} />
-                                    </button>
-                                    <button
-                                        onClick={() => handleDeleteClick(course.id)}
-                                        className="p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors"
-                                        title="Excluir Curso"
-                                    >
-                                        <Trash2 size={18} />
-                                    </button>
+                                    {canEdit && (
+                                        <>
+                                            <button
+                                                onClick={() => handleEditClick(course)}
+                                                className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
+                                                title="Editar Curso"
+                                            >
+                                                <Pencil size={18} />
+                                            </button>
+                                            <button
+                                                onClick={() => handleDeleteClick(course.id)}
+                                                className="p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors"
+                                                title="Excluir Curso"
+                                            >
+                                                <Trash2 size={18} />
+                                            </button>
+                                        </>
+                                    )}
                                 </div>
                             </div>
                         </div>

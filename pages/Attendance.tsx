@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useStore } from '../context/AppStore';
 import { AttendanceLog, AttendanceStatus, EnrollmentStatus, ClassScheduleItem } from '../types';
-import { Calendar, Check, Clock, X, ChevronRight, User as UserIcon, Save, Grid, List } from 'lucide-react';
+import { Calendar, Check, Clock, X, ChevronRight, User as UserIcon, Save, Grid, List, Download } from 'lucide-react';
 
 interface MatrixColumn {
     id: string;
@@ -221,6 +221,36 @@ export const AttendancePage: React.FC = () => {
         };
     };
 
+    const handleExportMatrixCSV = () => {
+        if (!selectedClass) return;
+
+        // Headers
+        const dateHeaders = matrixColumns.map(col => {
+            const [y, m, d] = col.date.split('-');
+            return `${d}/${m} ${col.time}`;
+        });
+        const headers = ['Aluno', '% Freq', ...dateHeaders];
+
+        // Rows
+        const rows = classStudents.map(student => {
+            const stats = getAttendanceStats(student.id);
+            const percentage = stats.percent.toFixed(0) + '%';
+
+            const statuses = matrixColumns.map(col => {
+                return getStudentStatusForColumn(student.id, col);
+            });
+
+            return [`"${student.name}"`, percentage, ...statuses].join(',');
+        });
+
+        const csvContent = [headers.join(','), ...rows].join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `frequencia_${selectedClass.name.replace(/\s+/g, '_')}.csv`;
+        link.click();
+    };
+
     const inputClass = "appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm bg-white text-gray-900";
 
     return (
@@ -427,6 +457,13 @@ export const AttendancePage: React.FC = () => {
                             <span className="flex items-center"><span className="w-2 h-2 rounded-full bg-red-500 mr-1"></span> Falta (F)</span>
                             <span className="flex items-center"><span className="w-2 h-2 rounded-full bg-yellow-500 mr-1"></span> Justificado (J)</span>
                         </div>
+                        <button
+                            onClick={handleExportMatrixCSV}
+                            className="ml-4 flex items-center space-x-1 text-primary-600 hover:text-primary-800 text-sm font-medium transition-colors"
+                        >
+                            <Download size={16} />
+                            <span>Exportar CSV</span>
+                        </button>
                     </div>
 
                     <div className="overflow-x-auto pb-2">

@@ -13,9 +13,9 @@ const SidebarItem = ({ icon: Icon, label, path, active, onClick }: any) => (
   <Link
     to={path}
     onClick={onClick}
-    className={`group flex items-center px-4 py-3 mb-1 text-sm font-medium rounded-lg transition-all duration-200 ${active
-      ? 'bg-primary-50 text-primary-700 shadow-sm'
-      : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+    className={`group flex items-center px-4 py-3 mb-1 text-sm font-medium rounded-lg transition-all duration-200 border-l-4 ${active
+      ? 'bg-gradient-to-r from-orange-50 to-white text-primary-700 shadow-sm border-primary-500'
+      : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 border-transparent'
       }`}
   >
     <Icon
@@ -57,10 +57,26 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
   const role = currentUser.role;
   const isManagerOrCoord = role === UserRole.GESTOR || role === UserRole.COORDENADOR;
+  const isInstructorOrAux = role === UserRole.INSTRUTOR || role === UserRole.AUXILIAR_INSTRUCAO;
   const isAmbassador = role === UserRole.EMBAIXADOR;
+  const isDriver = role === UserRole.MOTORISTA;
 
-  // Filter Dashboard Link based on role
-  const shouldShowDashboard = isManagerOrCoord;
+  // Visibility Logic
+  const showDashboard = isManagerOrCoord;
+  const showCourses = isManagerOrCoord || isInstructorOrAux;
+  const showClasses = isManagerOrCoord || isInstructorOrAux;
+  const showStudents = isManagerOrCoord;
+  const showAttendance = isManagerOrCoord || isInstructorOrAux;
+  const showEvaluations = isManagerOrCoord || isInstructorOrAux;
+  const showCertificates = isManagerOrCoord || isAmbassador;
+  const showSetupTeardown = isManagerOrCoord;
+  const showChecklists = isManagerOrCoord || isInstructorOrAux || isDriver;
+  const showDocuments = isManagerOrCoord || isInstructorOrAux || isDriver;
+  const showTasks = isManagerOrCoord || isInstructorOrAux || isDriver;
+  const showFinance = isManagerOrCoord || isInstructorOrAux;
+  const showFirefighters = isManagerOrCoord || isAmbassador;
+  const showUsers = isManagerOrCoord;
+  const showProfile = true;
 
   // Helper to determine active state (exact match for root, startsWith for others)
   const isActive = (path: string) => {
@@ -83,15 +99,15 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
       {/* Sidebar */}
       <aside className={`
-        fixed inset-y-0 left-0 z-30 w-64 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out flex flex-col
+        fixed inset-y-0 left-0 z-30 w-64 bg-white border-r border-orange-100 transform transition-transform duration-300 ease-in-out flex flex-col
         ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}>
         {/* Header Logo */}
-        <div className="h-16 flex items-center px-6 border-b border-gray-100 bg-white flex-shrink-0">
+        <div className="h-16 flex items-center px-6 border-b border-orange-100 bg-white flex-shrink-0">
           <div className="flex items-center space-x-2 text-primary-600">
-            <Shield size={28} className="fill-current" />
+            <Flame size={28} className="fill-orange-500 text-orange-600 animate-pulse-slow" />
             <span className="text-sm font-extrabold tracking-tight text-gray-900 leading-tight">
-              OE-SESCINC <br /><span className="text-primary-600">Med+ Group</span>
+              OE-SESCINC <br /><span className="bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-orange-500">Med+ Group</span>
             </span>
           </div>
         </div>
@@ -99,37 +115,37 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         {/* Scrollable Nav Items */}
         <nav className="flex-1 px-4 py-6 overflow-y-auto custom-scrollbar space-y-1">
           <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 px-2 mt-2">Geral</div>
-          {shouldShowDashboard && (
+          {showDashboard && (
             <SidebarItem icon={LayoutDashboard} label="Dashboard" path="/" active={isActive('/')} onClick={() => setMobileMenuOpen(false)} />
           )}
 
           <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 px-2 mt-6">Acadêmico</div>
-          <SidebarItem icon={BookOpen} label="Cursos" path="/courses" active={isActive('/courses')} onClick={() => setMobileMenuOpen(false)} />
-          <SidebarItem icon={GraduationCap} label="Turmas" path="/classes" active={isActive('/classes')} onClick={() => setMobileMenuOpen(false)} />
-          <SidebarItem icon={Users} label="Alunos" path="/students" active={isActive('/students')} onClick={() => setMobileMenuOpen(false)} />
-          <SidebarItem icon={CalendarCheck} label="Frequência" path="/attendance" active={isActive('/attendance')} onClick={() => setMobileMenuOpen(false)} />
-          <SidebarItem icon={ClipboardCheck} label="Avaliações" path="/evaluations" active={isActive('/evaluations')} onClick={() => setMobileMenuOpen(false)} />
-          {isManagerOrCoord && (
+          {showCourses && <SidebarItem icon={BookOpen} label="Cursos" path="/courses" active={isActive('/courses')} onClick={() => setMobileMenuOpen(false)} />}
+          {showClasses && <SidebarItem icon={GraduationCap} label="Turmas" path="/classes" active={isActive('/classes')} onClick={() => setMobileMenuOpen(false)} />}
+          {showStudents && <SidebarItem icon={Users} label="Alunos" path="/students" active={isActive('/students')} onClick={() => setMobileMenuOpen(false)} />}
+          {showAttendance && <SidebarItem icon={CalendarCheck} label="Frequência" path="/attendance" active={isActive('/attendance')} onClick={() => setMobileMenuOpen(false)} />}
+          {showEvaluations && <SidebarItem icon={ClipboardCheck} label="Avaliações" path="/evaluations" active={isActive('/evaluations')} onClick={() => setMobileMenuOpen(false)} />}
+          {showCertificates && (
             <SidebarItem icon={FileBadge} label="Certificados" path="/certificates" active={isActive('/certificates')} onClick={() => setMobileMenuOpen(false)} />
           )}
 
           <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 px-2 mt-6">Operacional</div>
-          <SidebarItem icon={Wrench} label="Montagem/Desmontagem" path="/setup-teardown" active={isActive('/setup-teardown')} onClick={() => setMobileMenuOpen(false)} />
-          <SidebarItem icon={ClipboardList} label="Checklists" path="/checklists" active={isActive('/checklists')} onClick={() => setMobileMenuOpen(false)} />
+          {showSetupTeardown && <SidebarItem icon={Wrench} label="Montagem/Desmontagem" path="/setup-teardown" active={isActive('/setup-teardown')} onClick={() => setMobileMenuOpen(false)} />}
+          {showChecklists && <SidebarItem icon={ClipboardList} label="Checklists" path="/checklists" active={isActive('/checklists')} onClick={() => setMobileMenuOpen(false)} />}
 
           <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 px-2 mt-6">Administrativo</div>
-          <SidebarItem icon={FileBadge} label="Documentos" path="/documents" active={isActive('/documents')} onClick={() => setMobileMenuOpen(false)} />
-          <SidebarItem icon={CheckSquare} label="Tarefas" path="/tasks" active={isActive('/tasks')} onClick={() => setMobileMenuOpen(false)} />
-          <SidebarItem icon={DollarSign} label="Financeiro" path="/finance" active={isActive('/finance')} onClick={() => setMobileMenuOpen(false)} />
-          {(isManagerOrCoord || isAmbassador) && (
+          {showDocuments && <SidebarItem icon={FileBadge} label="Documentos" path="/documents" active={isActive('/documents')} onClick={() => setMobileMenuOpen(false)} />}
+          {showTasks && <SidebarItem icon={CheckSquare} label="Tarefas" path="/tasks" active={isActive('/tasks')} onClick={() => setMobileMenuOpen(false)} />}
+          {showFinance && <SidebarItem icon={DollarSign} label="Financeiro" path="/finance" active={isActive('/finance')} onClick={() => setMobileMenuOpen(false)} />}
+          {showFirefighters && (
             <SidebarItem icon={Flame} label="Bombeiros" path="/firefighters" active={isActive('/firefighters')} onClick={() => setMobileMenuOpen(false)} />
           )}
-          {(isManagerOrCoord || isAmbassador) && (
+          {showUsers && (
             <SidebarItem icon={Users} label="Usuários" path="/users" active={isActive('/users')} onClick={() => setMobileMenuOpen(false)} />
           )}
 
           <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 px-2 mt-6">Conta</div>
-          <SidebarItem icon={UserCog} label="Meu Perfil" path="/profile" active={isActive('/profile')} onClick={() => setMobileMenuOpen(false)} />
+          {showProfile && <SidebarItem icon={UserCog} label="Meu Perfil" path="/profile" active={isActive('/profile')} onClick={() => setMobileMenuOpen(false)} />}
         </nav>
 
         {/* Footer Logout */}
