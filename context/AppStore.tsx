@@ -40,6 +40,7 @@ interface StoreContextType {
 
     addStudent: (student: Student) => Promise<void>;
     updateStudent: (student: Student) => Promise<void>;
+    deleteStudent: (id: string) => Promise<void>;
 
     addTask: (task: Task) => Promise<void>;
     updateTask: (task: Task) => Promise<void>;
@@ -47,6 +48,7 @@ interface StoreContextType {
     addAttendanceLog: (log: AttendanceLog) => Promise<void>;
     addGradeLog: (log: GradeLog) => Promise<void>;
     addPayment: (payment: PaymentRecord) => Promise<void>;
+    deletePayment: (id: string) => Promise<void>;
 
     addChecklistLog: (log: ChecklistLog) => Promise<void>;
     updateChecklistTemplate: (template: ChecklistTemplate) => Promise<void>;
@@ -64,6 +66,7 @@ interface StoreContextType {
     deleteBase: (id: string) => Promise<void>;
 
     updateUser: (user: User) => Promise<void>;
+    deleteUser: (id: string) => Promise<void>;
 
     addFolder: (folder: Folder) => Promise<void>;
     deleteFolder: (id: string) => Promise<void>;
@@ -503,6 +506,11 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         await syncWithSupabase('users', 'UPDATE', mapUserToDB(user), user.id);
     };
 
+    const deleteUser = async (id: string) => {
+        setUsers(users.filter(u => u.id !== id));
+        await syncWithSupabase('users', 'DELETE', null, id);
+    };
+
     const mapCourseToDB = (course: Course) => {
         const mapped = {
             id: course.id,
@@ -566,6 +574,11 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const updateStudent = async (student: Student) => {
         setStudents(students.map(s => s.id === student.id ? student : s));
         await syncWithSupabase('students', 'UPDATE', mapStudentToDB(student));
+    };
+
+    const deleteStudent = async (id: string) => {
+        setStudents(students.filter(s => s.id !== id));
+        await syncWithSupabase('students', 'DELETE', null, id);
     };
 
     const addTask = async (task: Task) => {
@@ -652,6 +665,11 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const addPayment = async (payment: PaymentRecord) => {
         setPayments([...payments, payment]);
         await syncWithSupabase('payments', 'INSERT', mapPaymentToDB(payment));
+    };
+
+    const deletePayment = async (id: string) => {
+        setPayments(payments.filter(p => p.id !== id));
+        await syncWithSupabase('payments', 'DELETE', null, id);
     };
 
     const addChecklistLog = async (log: ChecklistLog) => {
@@ -778,11 +796,11 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         <StoreContext.Provider value={{
             currentUser, users, courses, classes, students, tasks, attendanceLogs, gradeLogs, payments, checklistTemplates, checklistLogs, notifications, swapRequests, firefighters, firefighterLogs, bases, folders, documents, setupTeardownAssignments,
             loading, login, logout,
-            addUser, addCourse, updateCourse, deleteCourse, addClass, updateClass, addStudent, updateStudent, addTask, updateTask,
-            addAttendanceLog, addGradeLog, addPayment, addChecklistLog, updateChecklistTemplate,
+            addUser, addCourse, updateCourse, deleteCourse, addClass, updateClass, addStudent, updateStudent, deleteStudent, addTask, updateTask,
+            addAttendanceLog, addGradeLog, addPayment, deletePayment, addChecklistLog, updateChecklistTemplate,
             markNotificationAsRead, requestSwap, resolveSwapRequest,
             addFirefighter, updateFirefighter, deleteFirefighter, addFirefighterLog,
-            addBase, deleteBase, updateUser,
+            addBase, deleteBase, updateUser, deleteUser,
 
             addFolder: async (folder: Folder) => {
                 setFolders([...folders, folder]);
@@ -924,7 +942,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             }
         }}>
             {children}
-        </StoreContext.Provider>
+        </StoreContext.Provider >
     );
 };
 

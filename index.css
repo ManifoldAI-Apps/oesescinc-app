@@ -61,6 +61,55 @@ div.card-premium,
   }
 }
 
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Floating Particles Animation */
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0) translateX(0) scale(1);
+    opacity: 0.3;
+  }
+
+  25% {
+    transform: translateY(-100vh) translateX(20px) scale(1.2);
+    opacity: 0.6;
+  }
+
+  50% {
+    transform: translateY(-200vh) translateX(-20px) scale(0.8);
+    opacity: 0.4;
+  }
+
+  75% {
+    transform: translateY(-300vh) translateX(30px) scale(1.1);
+    opacity: 0.5;
+  }
+}
+
+@keyframes pulseSlow {
+
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+
+  50% {
+    opacity: 0.6;
+  }
+}
+
 /* Utility Classes */
 .animate-fade-in {
   animation: fadeIn 200ms ease-out;
@@ -72,6 +121,41 @@ div.card-premium,
 
 .animate-scale-in {
   animation: fadeIn 200ms ease-out;
+}
+
+.animate-slide-down {
+  animation: slideDown 600ms ease-out;
+}
+
+.animate-pulse-slow {
+  animation: pulseSlow 8s ease-in-out infinite;
+}
+
+/* Floating Particles */
+.floating-particle {
+  position: absolute;
+  bottom: -50px;
+  width: 4px;
+  height: 4px;
+  background: linear-gradient(135deg, #ea580c, #f97316);
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(234, 88, 12, 0.5),
+    0 0 20px rgba(234, 88, 12, 0.3),
+    0 0 30px rgba(234, 88, 12, 0.1);
+  animation: float 15s linear infinite;
+  pointer-events: none;
+}
+
+.floating-particle::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px;
+  height: 8px;
+  background: radial-gradient(circle, rgba(234, 88, 12, 0.4) 0%, transparent 70%);
+  border-radius: 50%;
 }
 
 /* Button */

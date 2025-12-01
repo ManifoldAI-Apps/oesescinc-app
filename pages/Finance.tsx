@@ -23,10 +23,11 @@ interface FinancialLogItem {
     value: number;
     status: 'Pago' | 'Pendente';
     paymentDate?: string;
+    paymentId?: string;
 }
 
 export const FinancePage: React.FC = () => {
-    const { currentUser, classes, courses, users, payments, addPayment, setupTeardownAssignments } = useStore();
+    const { currentUser, classes, courses, users, payments, addPayment, deletePayment, setupTeardownAssignments } = useStore();
     const [selectedLogs, setSelectedLogs] = useState<string[]>([]); // Array of composite IDs
 
     // Filters
@@ -93,6 +94,8 @@ export const FinancePage: React.FC = () => {
             if (isInstructor && assignment.instructorId !== currentUser.id) return;
 
             const instructorUser = users.find(u => u.id === assignment.instructorId);
+            const paymentRecord = payments.find(p => p.scheduleItemId === assignment.id && p.instructorId === assignment.instructorId);
+            const isPaid = !!paymentRecord;
 
             items.push({
                 id: `setup-${assignment.id}`,
@@ -109,8 +112,9 @@ export const FinancePage: React.FC = () => {
                 days: assignment.days,
                 rate: assignment.rate,
                 value: assignment.totalValue,
-                status: 'Pago', // Assumir pago por padrão
-                paymentDate: assignment.date
+                status: isPaid ? 'Pago' : 'Pendente',
+                paymentDate: paymentRecord?.datePaid,
+                paymentId: paymentRecord?.id
             });
         });
 
@@ -225,6 +229,26 @@ export const FinancePage: React.FC = () => {
             }
         });
         setSelectedLogs([]);
+    };
+
+    const handleTogglePaymentStatus = async (item: any) => {
+        if (!canManagePayments) return;
+
+        if (item.status === 'Pago' && item.paymentId) {
+            if (confirm('Deseja cancelar o pagamento deste item?')) {
+                await deletePayment(item.paymentId);
+            }
+        } else if (item.status === 'Pendente') {
+            const payment: PaymentRecord = {
+                id: Math.random().toString(36).substr(2, 9),
+                scheduleItemId: item.scheduleId,
+                instructorId: item.instructorId,
+                amount: item.value,
+                datePaid: new Date().toISOString(),
+                paidBy: currentUser.id
+            };
+            await addPayment(payment);
+        }
     };
 
     const handleExportCSV = () => {
@@ -519,9 +543,17 @@ export const FinancePage: React.FC = () => {
                                             R$ {log.value.toFixed(2)}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-center">
-                                            <span className={`px-2 py-1 rounded-full text-xs font-bold ${log.status === 'Pago' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                                            <button
+                                                onClick={() => handleTogglePaymentStatus(log)}
+                                                disabled={!canManagePayments}
+                                                className={`px-2 py-1 rounded-full text-xs font-bold transition-colors ${log.status === 'Pago'
+                                                        ? 'bg-green-100 text-green-800 hover:bg-green-200'
+                                                        : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
+                                                    }`}
+                                                title={canManagePayments ? "Clique para alterar status" : ""}
+                                            >
                                                 {log.status}
-                                            </span>
+                                            </button>
                                             {log.status === 'Pago' && log.paymentDate && (
                                                 <div className="text-[10px] text-gray-400 mt-1">
                                                     {new Date(log.paymentDate).toLocaleDateString()}

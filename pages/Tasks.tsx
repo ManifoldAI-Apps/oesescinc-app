@@ -9,6 +9,7 @@ export const TasksPage: React.FC = () => {
     const { tasks, addTask, updateTask, users, currentUser } = useStore();
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [selectedTask, setSelectedTask] = useState<Task | null>(null); // For Details View
+    const [showCompleted, setShowCompleted] = useState(false);
 
     // Creation State
     const [newTask, setNewTask] = useState<Partial<Task>>({
@@ -132,7 +133,7 @@ export const TasksPage: React.FC = () => {
 
         // 2. Assigned tasks: Creator (Manager/Coord) and Assignee (Instructor/Driver) see them
         return t.creatorId === currentUser?.id || t.assigneeId === currentUser?.id;
-    });
+    }).filter(t => showCompleted ? t.status === 'Concluída' : t.status !== 'Concluída');
 
     // Assignable Users: Instructors and Drivers
     const assignableUsers = users.filter(u =>
@@ -155,10 +156,26 @@ export const TasksPage: React.FC = () => {
                 </button>
             </div>
 
+            {/* Toggle Completed */}
+            <div className="flex gap-2 border-b border-gray-200">
+                <button
+                    onClick={() => setShowCompleted(false)}
+                    className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${!showCompleted ? 'border-primary-600 text-primary-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+                >
+                    Pendentes
+                </button>
+                <button
+                    onClick={() => setShowCompleted(true)}
+                    className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${showCompleted ? 'border-primary-600 text-primary-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+                >
+                    Concluídas
+                </button>
+            </div>
+
             <div className="grid grid-cols-1 gap-4">
                 {visibleTasks.length === 0 && (
                     <div className="text-center py-12 text-gray-500 bg-white rounded-lg border border-dashed border-gray-300">
-                        Você não possui tarefas pendentes.
+                        {showCompleted ? 'Nenhuma tarefa concluída.' : 'Você não possui tarefas pendentes.'}
                     </div>
                 )}
                 {visibleTasks.map(task => {

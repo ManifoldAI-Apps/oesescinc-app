@@ -2,11 +2,11 @@
 import React, { useState, useMemo } from 'react';
 import { useStore } from '../context/AppStore';
 import { Student, CourseType, EnrollmentStatus } from '../types';
-import { Plus, X, Pencil, Filter } from 'lucide-react';
+import { Plus, Pencil, X, Trash2 } from 'lucide-react';
 import { formatCPF } from '../utils/formatters';
 
 export const StudentsPage: React.FC = () => {
-    const { students, addStudent, updateStudent, classes, courses } = useStore();
+    const { students, classes, addStudent, updateStudent, deleteStudent, courses } = useStore();
     const [showModal, setShowModal] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedClassFilter, setSelectedClassFilter] = useState('');
@@ -91,7 +91,7 @@ export const StudentsPage: React.FC = () => {
                 // 1. Matrícula: xx (2 digits) / Nome do Curso / Nº Turma - Ano
                 // Ex: 35/CBA-AT/Nº20-2025
                 const formattedIndex = listIndex.toString().padStart(2, '0');
-                const matricula = `${formattedIndex}/${course?.name.split(' ')[0] || 'CURSO'}/Nº${num}-${year}`;
+                const matricula = `${formattedIndex} /${course?.name.split(' ')[0] || 'CURSO'}/Nº${num} -${year} `;
 
                 let registro = '-';
                 let capCode = '-';
@@ -102,7 +102,7 @@ export const StudentsPage: React.FC = () => {
                     // 2. Registro: 08/Letra + (Base + Sequencia) / Ano
                     const baseReg = parseInt(cls.registrationNumber || '0');
                     const seqReg = baseReg + validStudentCounter;
-                    registro = `08/${courseLetter}${seqReg}/${year}`;
+                    registro = `08 / ${courseLetter}${seqReg}/${year}`;
 
                     // 3. CAP-BA: 08/C + (Base + Sequencia) / Ano (Skip for CBA-CE)
                     if (course?.type !== CourseType.CBA_CE) {
@@ -169,6 +169,12 @@ export const StudentsPage: React.FC = () => {
         setShowModal(false);
         setEditingId(null);
         setStudentForm({ enrollmentStatus: 'Matriculado' });
+    };
+
+    const handleDelete = async (id: string) => {
+        if (window.confirm('Tem certeza que deseja excluir este aluno? Esta ação não pode ser desfeita.')) {
+            await deleteStudent(id);
+        }
     };
 
     const [selectedYearFilter, setSelectedYearFilter] = useState('');
@@ -305,8 +311,11 @@ export const StudentsPage: React.FC = () => {
                                         </td>
 
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            <button onClick={() => handleEdit(s)} className="text-primary-600 hover:text-primary-900 hover:scale-110 transition-all duration-200">
+                                            <button onClick={() => handleEdit(s)} className="text-primary-600 hover:text-primary-900 hover:scale-110 transition-all duration-200 mr-2">
                                                 <Pencil size={18} />
+                                            </button>
+                                            <button onClick={() => handleDelete(s.id)} className="text-red-600 hover:text-red-900 hover:scale-110 transition-all duration-200">
+                                                <Trash2 size={18} />
                                             </button>
                                         </td>
                                     </tr>

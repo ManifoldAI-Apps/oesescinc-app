@@ -36,17 +36,22 @@ export const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-blue-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
-      {/* Decorative Elements */}
-      <div className="absolute top-0 left-0 w-72 h-72 bg-primary-100 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse"></div>
-      <div className="absolute bottom-0 right-0 w-72 h-72 bg-blue-100 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse" style={{ animationDelay: '1s' }}></div>
+    <div className="min-h-screen bg-gradient-to-br from-white via-primary-50 to-blue-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
+      {/* Futuristic Floating Particles */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="floating-particle" style={{ left: '10%', animationDelay: '0s' }}></div>
+        <div className="floating-particle" style={{ left: '20%', animationDelay: '2s' }}></div>
+        <div className="floating-particle" style={{ left: '30%', animationDelay: '4s' }}></div>
+        <div className="floating-particle" style={{ left: '40%', animationDelay: '1s' }}></div>
+        <div className="floating-particle" style={{ left: '50%', animationDelay: '3s' }}></div>
+        <div className="floating-particle" style={{ left: '60%', animationDelay: '5s' }}></div>
+        <div className="floating-particle" style={{ left: '70%', animationDelay: '2.5s' }}></div>
+        <div className="floating-particle" style={{ left: '80%', animationDelay: '4.5s' }}></div>
+        <div className="floating-particle" style={{ left: '90%', animationDelay: '1.5s' }}></div>
+      </div>
+      <div className="absolute inset-0 bg-gradient-to-t from-transparent via-primary-500/5 to-transparent animate-pulse-slow"></div>
 
       <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10 animate-slide-down">
-        <div className="flex justify-center text-primary-600 animate-bounce">
-          <div className="p-4 bg-white rounded-full shadow-lg">
-            <Shield size={48} />
-          </div>
-        </div>
         <h2 className="mt-6 text-center text-4xl font-extrabold text-gray-900">
           OE-SESCINC Med+ Group
         </h2>

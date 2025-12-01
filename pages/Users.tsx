@@ -2,11 +2,11 @@
 import React, { useState } from 'react';
 import { useStore } from '../context/AppStore';
 import { User, UserRole, UNIFORM_SIZES, SHOE_SIZES } from '../types';
-import { Plus, Search, Filter, X } from 'lucide-react';
+import { Plus, Search, Filter, X, Trash2 } from 'lucide-react';
 import { formatCPF } from '../utils/formatters';
 
 export const UsersPage: React.FC = () => {
-  const { users, addUser, currentUser } = useStore();
+  const { users, addUser, deleteUser, currentUser } = useStore();
   const [showModal, setShowModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -48,6 +48,12 @@ export const UsersPage: React.FC = () => {
     addUser(user);
     setShowModal(false);
     setNewUser({ role: UserRole.INSTRUTOR, base: '', uniformSize: { jumpsuit: 'M', shoes: '40', shirt: 'M' }, ppeSize: { pants: 'M', jacket: 'M', gloves: 'M', boots: '40' } });
+  };
+
+  const handleDelete = async (id: string) => {
+    if (window.confirm('Tem certeza que deseja excluir este usuário? Esta ação não pode ser desfeita.')) {
+      await deleteUser(id);
+    }
   };
 
   const filteredUsers = users.filter(u =>
@@ -102,6 +108,7 @@ export const UsersPage: React.FC = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Base</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cadastrado Por</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -139,6 +146,11 @@ export const UsersPage: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className="text-green-600 text-sm font-medium">Ativo</span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <button onClick={() => handleDelete(user.id)} className="text-red-600 hover:text-red-900 hover:scale-110 transition-all duration-200">
+                      <Trash2 size={18} />
+                    </button>
                   </td>
                 </tr>
               ))}
