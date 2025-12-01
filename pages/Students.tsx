@@ -4,6 +4,7 @@ import { useStore } from '../context/AppStore';
 import { Student, CourseType, EnrollmentStatus } from '../types';
 import { Plus, Pencil, X, Trash2 } from 'lucide-react';
 import { formatCPF } from '../utils/formatters';
+import { formatDate } from '../utils/dateUtils';
 
 export const StudentsPage: React.FC = () => {
     const { students, classes, addStudent, updateStudent, deleteStudent, courses } = useStore();
@@ -250,7 +251,7 @@ export const StudentsPage: React.FC = () => {
                             onChange={(e) => setSelectedClassFilter(e.target.value)}
                         >
                             <option value="">Todas as Turmas</option>
-                            {classes.map(c => (
+                            {classes.sort((a, b) => a.name.localeCompare(b.name)).map(c => (
                                 <option key={c.id} value={c.id}>{c.name}</option>
                             ))}
                         </select>
@@ -346,7 +347,7 @@ export const StudentsPage: React.FC = () => {
                                                 onChange={e => setStudentForm({ ...studentForm, classId: e.target.value })}
                                             >
                                                 <option value="">Selecione uma turma...</option>
-                                                {classes.map(c => (
+                                                {classes.sort((a, b) => a.name.localeCompare(b.name)).map(c => (
                                                     <option key={c.id} value={c.id}>{c.name}</option>
                                                 ))}
                                             </select>

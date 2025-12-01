@@ -4,6 +4,7 @@ import { useStore } from '../context/AppStore';
 import { CourseType, UserRole } from '../types';
 import { FileBadge, Search, Filter, Printer, Award } from 'lucide-react';
 import { formatCPF } from '../utils/formatters';
+import { formatDate } from '../utils/dateUtils';
 
 export const CertificatesPage: React.FC = () => {
     const { students, classes, courses, currentUser } = useStore();
@@ -213,7 +214,7 @@ export const CertificatesPage: React.FC = () => {
                                 <div className="text-center md:text-right">
                                     <p className="text-sm font-bold text-gray-800">{cert.courseName}</p>
                                     <p className="text-xs text-gray-500">
-                                        Conclusão: {cert.endDate ? new Date(cert.endDate).toLocaleDateString() : 'N/A'}
+                                        Conclusão: {formatDate(cert.endDate)}
                                     </p>
                                 </div>
                                 <button

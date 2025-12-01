@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { useStore } from '../context/AppStore';
 import { SetupTeardownAssignment, UserRole } from '../types';
-import { Wrench, Plus, Trash2, Edit2, DollarSign, Calendar, User } from 'lucide-react';
+import { Wrench, Plus, Trash2, Edit2, DollarSign, Calendar, User, Download } from 'lucide-react';
+import { formatDate } from '../utils/dateUtils';
 
 export const SetupTeardownPage: React.FC = () => {
     const { currentUser, classes, users, setupTeardownAssignments, addSetupTeardownAssignment, deleteSetupTeardownAssignment, payments, addPayment } = useStore();
@@ -92,6 +93,36 @@ export const SetupTeardownPage: React.FC = () => {
         }
     };
 
+    const exportToCSV = () => {
+        const headers = ['Turma', 'Tipo', 'Instrutor', 'Dias', 'Valor Total', 'Data', 'Status Pagamento', 'Observações'];
+        const csvContent = [
+            headers.join(','),
+            ...filteredAssignments.map(a => {
+                const isPaid = payments.some(p => p.scheduleItemId === a.id);
+                return [
+                    `"${a.className}"`,
+                    a.type,
+                    `"${a.instructorName}"`,
+                    a.days,
+                    a.totalValue.toFixed(2),
+                    formatDate(a.date),
+                    isPaid ? 'Pago' : 'Pendente',
+                    `"${a.notes || ''}"`
+                ].join(',');
+            })
+        ].join('\n');
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `montagem_desmontagem_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     return (
         <div className="p-6 space-y-6 animate-fade-in">
             {/* Header */}
@@ -104,13 +135,22 @@ export const SetupTeardownPage: React.FC = () => {
                     <p className="text-gray-600 mt-1">Gerencie atribuições de montagem e desmontagem de turmas</p>
                 </div>
                 {canManage && (
-                    <button
-                        onClick={() => handleOpenModal()}
-                        className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
-                    >
-                        <Plus size={20} />
-                        Nova Atribuição
-                    </button>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={exportToCSV}
+                            className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                        >
+                            <Download size={20} />
+                            Exportar CSV
+                        </button>
+                        <button
+                            onClick={() => handleOpenModal()}
+                            className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                        >
+                            <Plus size={20} />
+                            Nova Atribuição
+                        </button>
+                    </div>
                 )}
             </div>
 
@@ -222,7 +262,7 @@ export const SetupTeardownPage: React.FC = () => {
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-right">
                                                 <span className="font-bold text-primary-600">R$ {assignment.totalValue.toFixed(2)}</span>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(assignment.date).toLocaleDateString('pt-BR')}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(assignment.date)}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-center">
                                                 <span className={`px-2 py-1 rounded-full text-xs font-bold ${isPaid ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
                                                     {isPaid ? 'Pago' : 'Pendente'}

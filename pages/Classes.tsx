@@ -5,6 +5,7 @@ import { ClassGroup, UserRole, ClassScheduleItem, Course, Subject, CourseType, U
 import { Plus, Calendar as CalendarIcon, Clock, ChevronRight, FileText, Download, Save, Trash2, X, ChevronDown, Check, RefreshCw } from 'lucide-react';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import { formatDate } from '../utils/dateUtils';
 
 // --- Components ---
 
@@ -858,7 +859,7 @@ export const ClassesPage: React.FC = () => {
                                 <div className="mt-4 space-y-2">
                                     <div className="flex items-center text-sm text-gray-500">
                                         <CalendarIcon size={16} className="mr-2" />
-                                        {getLocalDate(cls.startDate).toLocaleDateString()} - {getLocalDate(cls.endDate).toLocaleDateString()}
+                                        {formatDate(cls.startDate)} - {formatDate(cls.endDate)}
                                     </div>
                                     <div className="flex items-center text-sm text-gray-500">
                                         <Clock size={16} className="mr-2" />

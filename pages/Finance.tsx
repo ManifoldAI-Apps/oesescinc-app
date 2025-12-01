@@ -4,6 +4,7 @@ import { useStore } from '../context/AppStore';
 import { PaymentRecord, UserRole } from '../types';
 import { HOURLY_RATES } from '../constants';
 import { Check, DollarSign, Clock, Filter, AlertCircle, Calendar, BarChart2, Download, Search, Wrench } from 'lucide-react';
+import { formatDate } from '../utils/dateUtils';
 
 interface FinancialLogItem {
     id: string; // Composite ID for key
@@ -162,9 +163,11 @@ export const FinancePage: React.FC = () => {
         // Group raw items by instructor
         const statsMap: {
             [key: string]: {
+                id: string,
                 name: string,
                 role: string,
                 totalHours: number,
+                totalDays: number,
                 totalValue: number,
                 paidValue: number,
                 pendingValue: number,
@@ -176,9 +179,11 @@ export const FinancePage: React.FC = () => {
         rawFinancialItems.forEach(item => {
             if (!statsMap[item.instructorId]) {
                 statsMap[item.instructorId] = {
+                    id: item.instructorId,
                     name: item.instructorName,
                     role: item.instructorRole,
                     totalHours: 0,
+                    totalDays: 0,
                     totalValue: 0,
                     paidValue: 0,
                     pendingValue: 0,
@@ -187,6 +192,7 @@ export const FinancePage: React.FC = () => {
                 };
             }
             statsMap[item.instructorId].totalHours += item.hours ?? 0;
+            statsMap[item.instructorId].totalDays += item.days ?? 0;
             statsMap[item.instructorId].totalValue += item.value;
             if (item.status === 'Pago') {
                 statsMap[item.instructorId].paidValue += item.value;
@@ -356,7 +362,7 @@ export const FinancePage: React.FC = () => {
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Função</th>
                                     <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Part. em Turmas</th>
                                     <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Total Aulas</th>
-                                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Horas Ministradas</th>
+                                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Horas / Dias</th>
                                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Valor Recebido</th>
                                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Valor a Receber</th>
                                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Total Acumulado</th>
@@ -364,7 +370,12 @@ export const FinancePage: React.FC = () => {
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
                                 {instructorStats.map((stat, idx) => (
-                                    <tr key={idx} className="hover:bg-gray-50">
+                                    <tr
+                                        key={idx}
+                                        className={`hover:bg-blue-50 cursor-pointer transition-colors ${instructorFilter === stat.id ? 'bg-blue-100 ring-2 ring-blue-500' : ''}`}
+                                        onClick={() => setInstructorFilter(instructorFilter === stat.id ? '' : stat.id)}
+                                        title="Clique para filtrar o extrato abaixo"
+                                    >
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{stat.name}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-500">{stat.role}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-600">
@@ -374,7 +385,9 @@ export const FinancePage: React.FC = () => {
                                             {stat.totalEvents}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-center font-bold text-blue-600">
-                                            {stat.totalHours}h
+                                            {stat.totalHours > 0 && <span>{stat.totalHours}h</span>}
+                                            {stat.totalHours > 0 && stat.totalDays > 0 && <span className="mx-1">+</span>}
+                                            {stat.totalDays > 0 && <span>{stat.totalDays}d</span>}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-right font-bold text-green-600">
                                             R$ {stat.paidValue.toFixed(2)}
@@ -520,7 +533,7 @@ export const FinancePage: React.FC = () => {
                                             </td>
                                         )}
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {new Date(log.date).toLocaleDateString()}
+                                            {formatDate(log.date)}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm">
                                             <span className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium ${log.type === 'Aula' ? 'bg-blue-100 text-blue-800' :
@@ -573,7 +586,7 @@ export const FinancePage: React.FC = () => {
                                             </button>
                                             {log.status === 'Pago' && log.paymentDate && (
                                                 <div className="text-[10px] text-gray-400 mt-1">
-                                                    {new Date(log.paymentDate).toLocaleDateString()}
+                                                    {formatDate(log.paymentDate)}
                                                 </div>
                                             )}
                                         </td>
@@ -584,6 +597,6 @@ export const FinancePage: React.FC = () => {
                     </table>
                 </div>
             </div>
-        </div>
+        </div >
     );
 };
