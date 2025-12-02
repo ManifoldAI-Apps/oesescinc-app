@@ -2,7 +2,7 @@
 import React, { useState, useMemo } from 'react';
 import { useStore } from '../context/AppStore';
 import { UserRole, ChecklistType, ChecklistItemResult, ChecklistLog, ChecklistItemDefinition } from '../types';
-import { ClipboardList, CheckCircle, XCircle, Plus, Trash2, Camera, MessageSquare, AlertTriangle, Eye, Settings } from 'lucide-react';
+import { ClipboardList, CheckCircle, XCircle, Plus, Trash2, Camera, MessageSquare, AlertTriangle, Eye, Settings, Truck, PlusCircle } from 'lucide-react';
 import { getCurrentDateString } from '../utils/dateUtils';
 
 export const ChecklistsPage: React.FC = () => {
