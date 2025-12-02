@@ -15,6 +15,8 @@ export const SchedulePage: React.FC = () => {
     // Form State
     const [formData, setFormData] = useState<Partial<TrainingSchedule>>({});
 
+    const inputClass = "appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm bg-white text-gray-900";
+
     if (!currentUser || (currentUser.role !== UserRole.GESTOR && currentUser.role !== UserRole.COORDENADOR)) {
         return (
             <div className="flex items-center justify-center h-full">
@@ -129,7 +131,7 @@ export const SchedulePage: React.FC = () => {
 
     return (
         <div className="space-y-6 animate-fade-in">
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center animate-slide-down">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900">Cronograma de Treinamentos</h1>
                     <p className="text-gray-500 mt-1">Gerencie o itinerário e agenda da unidade móvel.</p>
@@ -162,7 +164,7 @@ export const SchedulePage: React.FC = () => {
             </div>
 
             {/* Filters */}
-            <div className="flex gap-4 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+            <div className="flex gap-4 bg-white p-4 rounded-xl border border-gray-200 shadow-sm animate-fade-in delay-100">
                 <div className="flex-1 relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                     <input
@@ -180,7 +182,7 @@ export const SchedulePage: React.FC = () => {
             </div>
 
             {/* Table */}
-            <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden animate-slide-up delay-200">
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm text-left">
                         <thead className="bg-gray-50 text-gray-700 font-semibold border-b border-gray-200">
@@ -203,7 +205,7 @@ export const SchedulePage: React.FC = () => {
                                 </tr>
                             ) : (
                                 filteredSchedules.map((schedule) => (
-                                    <tr key={schedule.id} className="hover:bg-gray-50 transition-colors">
+                                    <tr key={schedule.id} className="hover:bg-gray-50 transition-colors stagger-item">
                                         <td className="p-4">
                                             <div className="font-medium text-gray-900">{schedule.className}</div>
                                             <div className="text-xs text-gray-500 mt-1 flex items-center gap-1">
@@ -287,8 +289,8 @@ export const SchedulePage: React.FC = () => {
 
             {/* Modal */}
             {isModalOpen && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto animate-scale-in">
+                <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
+                    <div className="bg-white rounded-xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl animate-scale-in">
                         <div className="p-6 border-b border-gray-100 flex justify-between items-center">
                             <h2 className="text-xl font-bold text-gray-900">
                                 {editingSchedule ? 'Editar Agendamento' : 'Novo Agendamento'}
@@ -306,7 +308,7 @@ export const SchedulePage: React.FC = () => {
                                     <input
                                         type="text"
                                         required
-                                        className="input-field w-full"
+                                        className={inputClass}
                                         value={formData.className || ''}
                                         onChange={e => setFormData({ ...formData, className: e.target.value })}
                                     />
@@ -316,7 +318,7 @@ export const SchedulePage: React.FC = () => {
                                     <input
                                         type="text"
                                         required
-                                        className="input-field w-full"
+                                        className={inputClass}
                                         value={formData.origin || ''}
                                         onChange={e => setFormData({ ...formData, origin: e.target.value })}
                                     />
@@ -326,7 +328,7 @@ export const SchedulePage: React.FC = () => {
                                     <input
                                         type="text"
                                         required
-                                        className="input-field w-full"
+                                        className={inputClass}
                                         value={formData.destination || ''}
                                         onChange={e => setFormData({ ...formData, destination: e.target.value })}
                                     />
@@ -343,7 +345,7 @@ export const SchedulePage: React.FC = () => {
                                         <input
                                             type="date"
                                             required
-                                            className="input-field w-full"
+                                            className={inputClass}
                                             value={formData.medtruckDisplacementStart ? formData.medtruckDisplacementStart.split('T')[0] : ''}
                                             onChange={e => setFormData({ ...formData, medtruckDisplacementStart: e.target.value })}
                                         />
@@ -353,7 +355,7 @@ export const SchedulePage: React.FC = () => {
                                         <input
                                             type="date"
                                             required
-                                            className="input-field w-full"
+                                            className={inputClass}
                                             value={formData.medtruckDisplacementEnd ? formData.medtruckDisplacementEnd.split('T')[0] : ''}
                                             onChange={e => setFormData({ ...formData, medtruckDisplacementEnd: e.target.value })}
                                         />
@@ -371,7 +373,7 @@ export const SchedulePage: React.FC = () => {
                                         <input
                                             type="date"
                                             required
-                                            className="input-field w-full"
+                                            className={inputClass}
                                             value={formData.setupDate || ''}
                                             onChange={e => setFormData({ ...formData, setupDate: e.target.value })}
                                         />
@@ -381,7 +383,7 @@ export const SchedulePage: React.FC = () => {
                                         <input
                                             type="date"
                                             required
-                                            className="input-field w-full"
+                                            className={inputClass}
                                             value={formData.teardownDate || ''}
                                             onChange={e => setFormData({ ...formData, teardownDate: e.target.value })}
                                         />
@@ -398,13 +400,13 @@ export const SchedulePage: React.FC = () => {
                                         <input
                                             type="text"
                                             placeholder="Nome da Base"
-                                            className="input-field flex-1"
+                                            className={`${inputClass} flex-1`}
                                             id="baseInput"
                                         />
                                         <input
                                             type="number"
                                             placeholder="Qtd"
-                                            className="input-field w-24"
+                                            className={`${inputClass} w-24`}
                                             id="countInput"
                                         />
                                         <button
@@ -486,7 +488,7 @@ export const SchedulePage: React.FC = () => {
                                         <input
                                             type="date"
                                             required
-                                            className="input-field w-full"
+                                            className={inputClass}
                                             value={formData.theoryStart ? formData.theoryStart.split('T')[0] : ''}
                                             onChange={e => setFormData({ ...formData, theoryStart: e.target.value })}
                                         />
@@ -496,7 +498,7 @@ export const SchedulePage: React.FC = () => {
                                         <input
                                             type="date"
                                             required
-                                            className="input-field w-full"
+                                            className={inputClass}
                                             value={formData.theoryEnd ? formData.theoryEnd.split('T')[0] : ''}
                                             onChange={e => setFormData({ ...formData, theoryEnd: e.target.value })}
                                         />
@@ -506,7 +508,7 @@ export const SchedulePage: React.FC = () => {
                                         <input
                                             type="number"
                                             required
-                                            className="input-field w-full bg-gray-50"
+                                            className={`${inputClass} bg-gray-50`}
                                             value={formData.theoryStudentCount || ''}
                                             onChange={e => setFormData({ ...formData, theoryStudentCount: parseInt(e.target.value) })}
                                         />
@@ -524,7 +526,7 @@ export const SchedulePage: React.FC = () => {
                                         <input
                                             type="date"
                                             required
-                                            className="input-field w-full"
+                                            className={inputClass}
                                             value={formData.practiceStart ? formData.practiceStart.split('T')[0] : ''}
                                             onChange={e => setFormData({ ...formData, practiceStart: e.target.value })}
                                         />
@@ -534,7 +536,7 @@ export const SchedulePage: React.FC = () => {
                                         <input
                                             type="date"
                                             required
-                                            className="input-field w-full"
+                                            className={inputClass}
                                             value={formData.practiceEnd ? formData.practiceEnd.split('T')[0] : ''}
                                             onChange={e => setFormData({ ...formData, practiceEnd: e.target.value })}
                                         />
@@ -544,7 +546,7 @@ export const SchedulePage: React.FC = () => {
                                         <input
                                             type="number"
                                             required
-                                            className="input-field w-full bg-gray-50"
+                                            className={`${inputClass} bg-gray-50`}
                                             value={formData.practiceStudentCount || ''}
                                             onChange={e => setFormData({ ...formData, practiceStudentCount: parseInt(e.target.value) })}
                                         />
@@ -562,7 +564,7 @@ export const SchedulePage: React.FC = () => {
                                         <input
                                             type="text"
                                             required
-                                            className="input-field w-full"
+                                            className={inputClass}
                                             value={formData.studentLocality || ''}
                                             onChange={e => setFormData({ ...formData, studentLocality: e.target.value })}
                                         />
@@ -572,7 +574,7 @@ export const SchedulePage: React.FC = () => {
                                         <input
                                             type="text"
                                             required
-                                            className="input-field w-full"
+                                            className={inputClass}
                                             value={formData.location || ''}
                                             onChange={e => setFormData({ ...formData, location: e.target.value })}
                                         />
@@ -584,13 +586,13 @@ export const SchedulePage: React.FC = () => {
                                 <button
                                     type="button"
                                     onClick={handleCloseModal}
-                                    className="btn-ghost"
+                                    className="px-6 py-2.5 border rounded-lg text-gray-700 hover:bg-gray-50 bg-white font-medium transition-colors"
                                 >
                                     Cancelar
                                 </button>
                                 <button
                                     type="submit"
-                                    className="btn-primary bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white shadow-md hover:shadow-lg transition-all duration-200"
+                                    className="btn-premium bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white px-8 py-2.5 rounded-lg shadow-md font-semibold transition-all duration-200"
                                 >
                                     {editingSchedule ? 'Salvar Alterações' : 'Criar Agendamento'}
                                 </button>
