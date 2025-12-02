@@ -835,7 +835,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                     practiceEnd: item.practice_end,
                     practiceStudentCount: item.practice_student_count,
                     studentLocality: item.student_locality,
-                    location: item.location
+                    location: item.location,
+                    studentBreakdown: item.student_breakdown || []
                 })));
             }
         } catch (error) {
@@ -863,7 +864,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             practice_end: newSchedule.practiceEnd,
             practice_student_count: newSchedule.practiceStudentCount,
             student_locality: newSchedule.studentLocality,
-            location: newSchedule.location
+            location: newSchedule.location,
+            student_breakdown: newSchedule.studentBreakdown || []
         };
 
         await syncWithSupabase('training_schedules', 'INSERT', dbRecord);
@@ -893,6 +895,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             practice_student_count: updatedSchedule.practiceStudentCount,
             student_locality: updatedSchedule.studentLocality,
             location: updatedSchedule.location,
+            student_breakdown: updatedSchedule.studentBreakdown || [],
             updated_at: new Date().toISOString()
         };
 

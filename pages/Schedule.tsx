@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { useStore } from '../context/AppStore';
 import { UserRole, TrainingSchedule } from '../types';
-import { Plus, Search, Filter, Edit2, Trash2, MapPin, Calendar, Truck, Users, Clock } from 'lucide-react';
+import { Plus, Search, Filter, Edit2, Trash2, MapPin, Calendar, Truck, Users, Clock, Download, FileText } from 'lucide-react';
 import { formatDate, formatDateTime } from '../utils/dateUtils';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 export const SchedulePage: React.FC = () => {
     const { currentUser, trainingSchedules, addTrainingSchedule, updateTrainingSchedule, deleteTrainingSchedule } = useStore();
@@ -70,6 +72,61 @@ export const SchedulePage: React.FC = () => {
         }
     };
 
+    const exportToCSV = () => {
+        const headers = ['Turma', 'Origem', 'Destino', 'Deslocamento Ida', 'Deslocamento Volta', 'Montagem', 'Desmontagem', 'Teórico Início', 'Teórico Fim', 'Alunos Teórico', 'Prático Início', 'Prático Fim', 'Alunos Prático', 'Local', 'Localidade Alunos'];
+        const csvContent = [
+            headers.join(','),
+            ...filteredSchedules.map(s => [
+                `"${s.className}"`,
+                `"${s.origin}"`,
+                `"${s.destination}"`,
+                formatDate(s.medtruckDisplacementStart),
+                formatDate(s.medtruckDisplacementEnd),
+                formatDate(s.setupDate),
+                formatDate(s.teardownDate),
+                formatDate(s.theoryStart),
+                formatDate(s.theoryEnd),
+                s.theoryStudentCount,
+                formatDate(s.practiceStart),
+                formatDate(s.practiceEnd),
+                s.practiceStudentCount,
+                `"${s.location}"`,
+                `"${s.studentLocality}"`
+            ].join(','))
+        ].join('\n');
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'cronograma.csv';
+        link.click();
+    };
+
+    const exportToPDF = () => {
+        const doc = new jsPDF('l', 'mm', 'a4');
+        doc.text('Cronograma de Treinamentos', 14, 15);
+
+        const tableData = filteredSchedules.map(s => [
+            s.className,
+            `${s.origin} -> ${s.destination}`,
+            `${formatDate(s.medtruckDisplacementStart)} - ${formatDate(s.medtruckDisplacementEnd)}`,
+            `${formatDate(s.setupDate)} / ${formatDate(s.teardownDate)}`,
+            `${formatDate(s.theoryStart)} (${s.theoryStudentCount})`,
+            `${formatDate(s.practiceStart)} (${s.practiceStudentCount})`,
+            s.location
+        ]);
+
+        autoTable(doc, {
+            head: [['Turma', 'Rota', 'Deslocamento', 'Mont/Desm', 'Teórico', 'Prático', 'Local']],
+            body: tableData,
+            startY: 20,
+            styles: { fontSize: 8 },
+            headStyles: { fillColor: [22, 163, 74] }
+        });
+
+        doc.save('cronograma.pdf');
+    };
+
     return (
         <div className="space-y-6 animate-fade-in">
             <div className="flex justify-between items-center">
@@ -77,13 +134,31 @@ export const SchedulePage: React.FC = () => {
                     <h1 className="text-3xl font-bold text-gray-900">Cronograma de Treinamentos</h1>
                     <p className="text-gray-500 mt-1">Gerencie o itinerário e agenda da unidade móvel.</p>
                 </div>
-                <button
-                    onClick={() => handleOpenModal()}
-                    className="btn-primary flex items-center gap-2"
-                >
-                    <Plus size={20} />
-                    Novo Agendamento
-                </button>
+                <div className="flex gap-2">
+                    <button
+                        onClick={exportToCSV}
+                        className="btn-secondary flex items-center gap-2"
+                        title="Exportar CSV"
+                    >
+                        <FileText size={20} />
+                        CSV
+                    </button>
+                    <button
+                        onClick={exportToPDF}
+                        className="btn-secondary flex items-center gap-2"
+                        title="Exportar PDF"
+                    >
+                        <Download size={20} />
+                        PDF
+                    </button>
+                    <button
+                        onClick={() => handleOpenModal()}
+                        className="btn-primary bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2"
+                    >
+                        <Plus size={20} />
+                        Inserir
+                    </button>
+                </div>
             </div>
 
             {/* Filters */}
@@ -140,11 +215,11 @@ export const SchedulePage: React.FC = () => {
                                             <div className="flex flex-col gap-1">
                                                 <div className="flex items-center gap-1 text-xs text-gray-600">
                                                     <Truck size={12} className="text-blue-500" />
-                                                    Saída: {formatDateTime(schedule.medtruckDisplacementStart)}
+                                                    Saída: {formatDate(schedule.medtruckDisplacementStart)}
                                                 </div>
                                                 <div className="flex items-center gap-1 text-xs text-gray-600">
                                                     <Truck size={12} className="text-green-500" />
-                                                    Chegada: {formatDateTime(schedule.medtruckDisplacementEnd)}
+                                                    Chegada: {formatDate(schedule.medtruckDisplacementEnd)}
                                                 </div>
                                             </div>
                                         </td>
@@ -161,7 +236,7 @@ export const SchedulePage: React.FC = () => {
                                         <td className="p-4">
                                             <div className="flex flex-col gap-1">
                                                 <div className="text-xs text-gray-600">
-                                                    {formatDateTime(schedule.theoryStart)} - {formatDateTime(schedule.theoryEnd)}
+                                                    {formatDate(schedule.theoryStart)} - {formatDate(schedule.theoryEnd)}
                                                 </div>
                                                 <div className="flex items-center gap-1 text-xs text-gray-500">
                                                     <Users size={12} />
@@ -172,7 +247,7 @@ export const SchedulePage: React.FC = () => {
                                         <td className="p-4">
                                             <div className="flex flex-col gap-1">
                                                 <div className="text-xs text-gray-600">
-                                                    {formatDateTime(schedule.practiceStart)} - {formatDateTime(schedule.practiceEnd)}
+                                                    {formatDate(schedule.practiceStart)} - {formatDate(schedule.practiceEnd)}
                                                 </div>
                                                 <div className="flex items-center gap-1 text-xs text-gray-500">
                                                     <Users size={12} />
@@ -266,21 +341,21 @@ export const SchedulePage: React.FC = () => {
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Início</label>
                                         <input
-                                            type="datetime-local"
+                                            type="date"
                                             required
                                             className="input-field w-full"
-                                            value={formData.medtruckDisplacementStart ? new Date(formData.medtruckDisplacementStart).toISOString().slice(0, 16) : ''}
-                                            onChange={e => setFormData({ ...formData, medtruckDisplacementStart: new Date(e.target.value).toISOString() })}
+                                            value={formData.medtruckDisplacementStart ? formData.medtruckDisplacementStart.split('T')[0] : ''}
+                                            onChange={e => setFormData({ ...formData, medtruckDisplacementStart: e.target.value })}
                                         />
                                     </div>
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Término</label>
                                         <input
-                                            type="datetime-local"
+                                            type="date"
                                             required
                                             className="input-field w-full"
-                                            value={formData.medtruckDisplacementEnd ? new Date(formData.medtruckDisplacementEnd).toISOString().slice(0, 16) : ''}
-                                            onChange={e => setFormData({ ...formData, medtruckDisplacementEnd: new Date(e.target.value).toISOString() })}
+                                            value={formData.medtruckDisplacementEnd ? formData.medtruckDisplacementEnd.split('T')[0] : ''}
+                                            onChange={e => setFormData({ ...formData, medtruckDisplacementEnd: e.target.value })}
                                         />
                                     </div>
                                 </div>
@@ -316,27 +391,114 @@ export const SchedulePage: React.FC = () => {
 
                             <div className="border-t border-gray-100 pt-4">
                                 <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                                    <Users size={16} /> Composição da Turma (Por Base)
+                                </h3>
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-4">
+                                    <div className="flex gap-2 mb-2">
+                                        <input
+                                            type="text"
+                                            placeholder="Nome da Base"
+                                            className="input-field flex-1"
+                                            id="baseInput"
+                                        />
+                                        <input
+                                            type="number"
+                                            placeholder="Qtd"
+                                            className="input-field w-24"
+                                            id="countInput"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                const baseInput = document.getElementById('baseInput') as HTMLInputElement;
+                                                const countInput = document.getElementById('countInput') as HTMLInputElement;
+                                                const base = baseInput.value;
+                                                const count = parseInt(countInput.value);
+
+                                                if (base && count > 0) {
+                                                    const currentBreakdown = formData.studentBreakdown || [];
+                                                    const newBreakdown = [...currentBreakdown, { base, count }];
+                                                    const total = newBreakdown.reduce((sum, item) => sum + item.count, 0);
+
+                                                    setFormData({
+                                                        ...formData,
+                                                        studentBreakdown: newBreakdown,
+                                                        theoryStudentCount: total,
+                                                        practiceStudentCount: total
+                                                    });
+
+                                                    baseInput.value = '';
+                                                    countInput.value = '';
+                                                    baseInput.focus();
+                                                }
+                                            }}
+                                            className="btn-secondary"
+                                        >
+                                            Adicionar
+                                        </button>
+                                    </div>
+
+                                    {formData.studentBreakdown && formData.studentBreakdown.length > 0 && (
+                                        <div className="space-y-2 mt-3">
+                                            {formData.studentBreakdown.map((item, index) => (
+                                                <div key={index} className="flex justify-between items-center bg-white p-2 rounded border border-gray-200 text-sm">
+                                                    <span className="font-medium text-gray-700">{item.base}</span>
+                                                    <div className="flex items-center gap-3">
+                                                        <span className="bg-primary-50 text-primary-700 px-2 py-0.5 rounded-full font-bold">
+                                                            {item.count} alunos
+                                                        </span>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                const newBreakdown = formData.studentBreakdown!.filter((_, i) => i !== index);
+                                                                const total = newBreakdown.reduce((sum, item) => sum + item.count, 0);
+                                                                setFormData({
+                                                                    ...formData,
+                                                                    studentBreakdown: newBreakdown,
+                                                                    theoryStudentCount: total,
+                                                                    practiceStudentCount: total
+                                                                });
+                                                            }}
+                                                            className="text-red-500 hover:text-red-700"
+                                                        >
+                                                            <Trash2 size={14} />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                            <div className="flex justify-end pt-2 border-t border-gray-200">
+                                                <span className="text-sm font-bold text-gray-900">
+                                                    Total: {formData.studentBreakdown.reduce((sum, item) => sum + item.count, 0)} alunos
+                                                </span>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="border-t border-gray-100 pt-4">
+                                <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
                                     <Users size={16} /> Treinamento Teórico
                                 </h3>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Início</label>
                                         <input
-                                            type="datetime-local"
+                                            type="date"
                                             required
                                             className="input-field w-full"
-                                            value={formData.theoryStart ? new Date(formData.theoryStart).toISOString().slice(0, 16) : ''}
-                                            onChange={e => setFormData({ ...formData, theoryStart: new Date(e.target.value).toISOString() })}
+                                            value={formData.theoryStart ? formData.theoryStart.split('T')[0] : ''}
+                                            onChange={e => setFormData({ ...formData, theoryStart: e.target.value })}
                                         />
                                     </div>
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Término</label>
                                         <input
-                                            type="datetime-local"
+                                            type="date"
                                             required
                                             className="input-field w-full"
-                                            value={formData.theoryEnd ? new Date(formData.theoryEnd).toISOString().slice(0, 16) : ''}
-                                            onChange={e => setFormData({ ...formData, theoryEnd: new Date(e.target.value).toISOString() })}
+                                            value={formData.theoryEnd ? formData.theoryEnd.split('T')[0] : ''}
+                                            onChange={e => setFormData({ ...formData, theoryEnd: e.target.value })}
                                         />
                                     </div>
                                     <div>
@@ -344,7 +506,7 @@ export const SchedulePage: React.FC = () => {
                                         <input
                                             type="number"
                                             required
-                                            className="input-field w-full"
+                                            className="input-field w-full bg-gray-50"
                                             value={formData.theoryStudentCount || ''}
                                             onChange={e => setFormData({ ...formData, theoryStudentCount: parseInt(e.target.value) })}
                                         />
@@ -360,21 +522,21 @@ export const SchedulePage: React.FC = () => {
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Início</label>
                                         <input
-                                            type="datetime-local"
+                                            type="date"
                                             required
                                             className="input-field w-full"
-                                            value={formData.practiceStart ? new Date(formData.practiceStart).toISOString().slice(0, 16) : ''}
-                                            onChange={e => setFormData({ ...formData, practiceStart: new Date(e.target.value).toISOString() })}
+                                            value={formData.practiceStart ? formData.practiceStart.split('T')[0] : ''}
+                                            onChange={e => setFormData({ ...formData, practiceStart: e.target.value })}
                                         />
                                     </div>
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Final</label>
                                         <input
-                                            type="datetime-local"
+                                            type="date"
                                             required
                                             className="input-field w-full"
-                                            value={formData.practiceEnd ? new Date(formData.practiceEnd).toISOString().slice(0, 16) : ''}
-                                            onChange={e => setFormData({ ...formData, practiceEnd: new Date(e.target.value).toISOString() })}
+                                            value={formData.practiceEnd ? formData.practiceEnd.split('T')[0] : ''}
+                                            onChange={e => setFormData({ ...formData, practiceEnd: e.target.value })}
                                         />
                                     </div>
                                     <div>
@@ -382,7 +544,7 @@ export const SchedulePage: React.FC = () => {
                                         <input
                                             type="number"
                                             required
-                                            className="input-field w-full"
+                                            className="input-field w-full bg-gray-50"
                                             value={formData.practiceStudentCount || ''}
                                             onChange={e => setFormData({ ...formData, practiceStudentCount: parseInt(e.target.value) })}
                                         />
@@ -428,7 +590,7 @@ export const SchedulePage: React.FC = () => {
                                 </button>
                                 <button
                                     type="submit"
-                                    className="btn-primary"
+                                    className="btn-primary bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white shadow-md hover:shadow-lg transition-all duration-200"
                                 >
                                     {editingSchedule ? 'Salvar Alterações' : 'Criar Agendamento'}
                                 </button>

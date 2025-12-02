@@ -451,6 +451,11 @@ export interface QuestionApprover {
   assignedAt: string;
   isActive: boolean;
 }
+export interface StudentBreakdownItem {
+  base: string;
+  count: number;
+}
+
 export interface TrainingSchedule {
   id: string;
   className: string;
@@ -468,4 +473,5 @@ export interface TrainingSchedule {
   practiceStudentCount: number;
   studentLocality: string;
   location: string;
+  studentBreakdown?: StudentBreakdownItem[];
 }
