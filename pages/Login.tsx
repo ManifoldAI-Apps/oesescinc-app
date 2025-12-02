@@ -4,7 +4,7 @@ import { Flame, Eye, EyeOff, Shield } from 'lucide-react';
 import { UserRole } from '../types';
 
 export const Login: React.FC = () => {
-  const { login, users } = useStore();
+  const { login, users, seedDatabase } = useStore();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -149,6 +149,17 @@ export const Login: React.FC = () => {
             <p className="text-xs text-gray-400 font-medium">
               Versão 2.0 • Desenvolvido por <span className="text-primary-600 font-bold">Manifold IA</span>
             </p>
+            <button
+              onClick={() => {
+                if (confirm('Isso irá restaurar os dados iniciais do sistema. Continuar?')) {
+                  seedDatabase();
+                  alert('Banco de dados restaurado! Tente fazer login novamente.');
+                }
+              }}
+              className="mt-4 text-[10px] text-gray-300 hover:text-primary-500 transition-colors"
+            >
+              Restaurar Banco de Dados
+            </button>
           </div>
         </div>
       </div>

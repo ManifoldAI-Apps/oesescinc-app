@@ -93,7 +93,9 @@ interface StoreContextType {
     // File Upload
     uploadDocument: (file: File, folderId: string | null) => Promise<string>;
     uploadProfilePhoto: (file: File, userId: string) => Promise<string>;
+    uploadProfilePhoto: (file: File, userId: string) => Promise<string>;
     deleteFile: (bucket: string, path: string) => Promise<void>;
+    seedDatabase: () => Promise<void>;
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
@@ -1107,7 +1109,9 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                     console.error('Erro ao deletar arquivo:', error);
                     throw error;
                 }
-            }
+            },
+
+            seedDatabase
         }}>
             {children}
         </StoreContext.Provider >
