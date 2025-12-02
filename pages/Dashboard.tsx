@@ -10,7 +10,7 @@ import {
 } from 'recharts';
 
 export const Dashboard: React.FC = () => {
-    const { classes, students, tasks, currentUser, payments, notifications, firefighters, setupTeardownAssignments } = useStore();
+    const { classes, students, tasks, currentUser, payments, notifications, firefighters, setupTeardownAssignments, courses } = useStore();
 
     if (!currentUser) return null;
 
@@ -95,34 +95,44 @@ export const Dashboard: React.FC = () => {
     const totalPaid = payments.reduce((acc, p) => acc + p.amount, 0);
 
     // 2. Calculate Real Pending Value (dynamic calculation)
+    // 2. Calculate Real Pending Value (dynamic calculation)
     const realPendingValue = useMemo(() => {
         let pending = 0;
 
         // Calculate unpaid schedule items (aulas)
         classes.forEach(cls => {
+            const course = courses.find(c => c.id === cls.courseId);
             cls.schedule.forEach(item => {
-                const isPaid = payments.some(p => p.scheduleItemId === item.id);
-                if (!isPaid) {
-                    // Use hourly rates based on modality
-                    const subject = cls.schedule.find(s => s.id === item.id);
-                    const rate = subject?.moduleId?.toLowerCase().includes('prática') || subject?.moduleId?.toLowerCase().includes('pratica')
-                        ? HOURLY_RATES.PRACTICE
-                        : HOURLY_RATES.THEORY;
-                    pending += item.duration * rate;
-                }
+                // Skip if no instructors assigned
+                if (!item.instructorIds || item.instructorIds.length === 0) return;
+
+                const subject = course?.subjects.find(s => s.id === item.subjectId);
+                if (!subject) return;
+
+                const rate = subject.modality === 'Prática' ? HOURLY_RATES.PRACTICE : HOURLY_RATES.THEORY;
+                const valuePerInstructor = item.duration * rate;
+
+                item.instructorIds.forEach(instId => {
+                    const isPaid = payments.some(p => p.scheduleItemId === item.id && p.instructorId === instId);
+                    if (!isPaid) {
+                        pending += valuePerInstructor;
+                    }
+                });
             });
         });
 
         // Add unpaid setup/teardown assignments
         setupTeardownAssignments.forEach(assignment => {
-            const isPaid = payments.some(p => p.scheduleItemId === assignment.id);
+            // Check if paid (checking both scheduleItemId and referenceId for compatibility)
+            const isPaid = payments.some(p => (p.scheduleItemId === assignment.id || (p as any).referenceId === assignment.id) && p.instructorId === assignment.instructorId);
+
             if (!isPaid) {
                 pending += assignment.totalValue;
             }
         });
 
         return pending;
-    }, [classes, payments, setupTeardownAssignments]);
+    }, [classes, courses, payments, setupTeardownAssignments]);
 
     // 2. Hours Stats
     const today = new Date();
@@ -140,7 +150,7 @@ export const Dashboard: React.FC = () => {
     ];
 
     // Re-implementation using the actual store data structure
-    const { courses } = useStore();
+    // const { courses } = useStore(); // Removed duplicate declaration
 
     courses.forEach(c => {
         const classIds = classes.filter(cls => cls.courseId === c.id).map(cls => cls.id);
