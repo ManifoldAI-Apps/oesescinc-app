@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useStore } from '../context/AppStore';
 import { UserRole, TrainingSchedule } from '../types';
-import { Plus, Search, Filter, Edit2, Trash2, MapPin, Calendar, Truck, Users, Clock, Download, FileText } from 'lucide-react';
+import { Plus, Search, Filter, Edit2, Trash2, MapPin, Calendar, Truck, Users, Clock, Download, FileText, List, LayoutList } from 'lucide-react';
 import { formatDate, formatDateTime } from '../utils/dateUtils';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -11,6 +11,7 @@ export const SchedulePage: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingSchedule, setEditingSchedule] = useState<TrainingSchedule | null>(null);
+    const [viewMode, setViewMode] = useState<'list' | 'timeline'>('list');
 
     // Form State
     const [formData, setFormData] = useState<Partial<TrainingSchedule>>({});
@@ -129,6 +130,85 @@ export const SchedulePage: React.FC = () => {
         doc.save('cronograma.pdf');
     };
 
+    const TimelineView = () => (
+        <div className="space-y-6">
+            {filteredSchedules.map((schedule) => (
+                <div key={schedule.id} className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 relative overflow-hidden">
+                    <div className="flex justify-between items-start mb-6">
+                        <div>
+                            <h3 className="text-lg font-bold text-gray-900">{schedule.className}</h3>
+                            <div className="flex items-center gap-2 text-sm text-gray-500 mt-1">
+                                <MapPin size={14} />
+                                {schedule.origin} <span className="text-gray-300">→</span> {schedule.destination}
+                                <span className="mx-2">•</span>
+                                <span className="font-medium text-gray-700">{schedule.location}</span>
+                            </div>
+                        </div>
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => handleOpenModal(schedule)}
+                                className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                            >
+                                <Edit2 size={18} />
+                            </button>
+                            <button
+                                onClick={() => handleDelete(schedule.id)}
+                                className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            >
+                                <Trash2 size={18} />
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Timeline Visualization */}
+                    <div className="relative pt-8 pb-4">
+                        {/* Base Line */}
+                        <div className="absolute top-1/2 left-0 right-0 h-1 bg-gray-100 -translate-y-1/2 rounded-full"></div>
+
+                        <div className="grid grid-cols-5 gap-4 relative z-10">
+                            {/* Step 1: Displacement Start */}
+                            <div className="text-center group">
+                                <div className="w-4 h-4 bg-blue-500 rounded-full mx-auto mb-2 ring-4 ring-white group-hover:scale-125 transition-transform"></div>
+                                <div className="text-xs font-bold text-blue-600 mb-1">Deslocamento</div>
+                                <div className="text-xs text-gray-500">{formatDate(schedule.medtruckDisplacementStart)}</div>
+                            </div>
+
+                            {/* Step 2: Setup */}
+                            <div className="text-center group">
+                                <div className="w-4 h-4 bg-orange-500 rounded-full mx-auto mb-2 ring-4 ring-white group-hover:scale-125 transition-transform"></div>
+                                <div className="text-xs font-bold text-orange-600 mb-1">Montagem</div>
+                                <div className="text-xs text-gray-500">{formatDate(schedule.setupDate)}</div>
+                            </div>
+
+                            {/* Step 3: Theory */}
+                            <div className="text-center group">
+                                <div className="w-4 h-4 bg-purple-500 rounded-full mx-auto mb-2 ring-4 ring-white group-hover:scale-125 transition-transform"></div>
+                                <div className="text-xs font-bold text-purple-600 mb-1">Teórico</div>
+                                <div className="text-xs text-gray-500">{formatDate(schedule.theoryStart)}</div>
+                                <div className="text-[10px] text-gray-400 mt-1">{schedule.theoryStudentCount} alunos</div>
+                            </div>
+
+                            {/* Step 4: Practice */}
+                            <div className="text-center group">
+                                <div className="w-4 h-4 bg-green-500 rounded-full mx-auto mb-2 ring-4 ring-white group-hover:scale-125 transition-transform"></div>
+                                <div className="text-xs font-bold text-green-600 mb-1">Prático</div>
+                                <div className="text-xs text-gray-500">{formatDate(schedule.practiceStart)}</div>
+                                <div className="text-[10px] text-gray-400 mt-1">{schedule.practiceStudentCount} alunos</div>
+                            </div>
+
+                            {/* Step 5: Teardown/Return */}
+                            <div className="text-center group">
+                                <div className="w-4 h-4 bg-red-500 rounded-full mx-auto mb-2 ring-4 ring-white group-hover:scale-125 transition-transform"></div>
+                                <div className="text-xs font-bold text-red-600 mb-1">Desmontagem</div>
+                                <div className="text-xs text-gray-500">{formatDate(schedule.teardownDate)}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
+
     return (
         <div className="space-y-6 animate-fade-in">
             <div className="flex justify-between items-center animate-slide-down">
@@ -137,6 +217,23 @@ export const SchedulePage: React.FC = () => {
                     <p className="text-gray-500 mt-1">Gerencie o itinerário e agenda da unidade móvel.</p>
                 </div>
                 <div className="flex gap-2">
+                    <div className="flex bg-gray-100 rounded-lg p-1 mr-2">
+                        <button
+                            onClick={() => setViewMode('list')}
+                            className={`p-2 rounded-md transition-all ${viewMode === 'list' ? 'bg-white shadow text-primary-600' : 'text-gray-500 hover:text-gray-700'}`}
+                            title="Lista"
+                        >
+                            <List size={20} />
+                        </button>
+                        <button
+                            onClick={() => setViewMode('timeline')}
+                            className={`p-2 rounded-md transition-all ${viewMode === 'timeline' ? 'bg-white shadow text-primary-600' : 'text-gray-500 hover:text-gray-700'}`}
+                            title="Linha do Tempo"
+                        >
+                            <LayoutList size={20} />
+                        </button>
+                    </div>
+
                     <button
                         onClick={exportToCSV}
                         className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors shadow-sm"
@@ -181,111 +278,115 @@ export const SchedulePage: React.FC = () => {
                 </button>
             </div>
 
-            {/* Table */}
-            <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden animate-slide-up delay-200">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-sm text-left">
-                        <thead className="bg-gray-50 text-gray-700 font-semibold border-b border-gray-200">
-                            <tr>
-                                <th className="p-4 min-w-[150px]">Turma</th>
-                                <th className="p-4 min-w-[200px]">Deslocamento Medtruck</th>
-                                <th className="p-4 min-w-[150px]">Montagem/Desmontagem</th>
-                                <th className="p-4 min-w-[200px]">Teórico</th>
-                                <th className="p-4 min-w-[200px]">Prático</th>
-                                <th className="p-4 min-w-[150px]">Local</th>
-                                <th className="p-4 text-right">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100">
-                            {filteredSchedules.length === 0 ? (
+            {/* Content View */}
+            {viewMode === 'list' ? (
+                <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden animate-slide-up delay-200">
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm text-left">
+                            <thead className="bg-gray-50 text-gray-700 font-semibold border-b border-gray-200">
                                 <tr>
-                                    <td colSpan={7} className="p-8 text-center text-gray-500">
-                                        Nenhum agendamento encontrado.
-                                    </td>
+                                    <th className="p-4 min-w-[150px]">Turma</th>
+                                    <th className="p-4 min-w-[200px]">Deslocamento Medtruck</th>
+                                    <th className="p-4 min-w-[150px]">Montagem/Desmontagem</th>
+                                    <th className="p-4 min-w-[200px]">Teórico</th>
+                                    <th className="p-4 min-w-[200px]">Prático</th>
+                                    <th className="p-4 min-w-[150px]">Local</th>
+                                    <th className="p-4 text-right">Ações</th>
                                 </tr>
-                            ) : (
-                                filteredSchedules.map((schedule) => (
-                                    <tr key={schedule.id} className="hover:bg-gray-50 transition-colors stagger-item">
-                                        <td className="p-4">
-                                            <div className="font-medium text-gray-900">{schedule.className}</div>
-                                            <div className="text-xs text-gray-500 mt-1 flex items-center gap-1">
-                                                <MapPin size={12} />
-                                                {schedule.origin} ➝ {schedule.destination}
-                                            </div>
-                                        </td>
-                                        <td className="p-4">
-                                            <div className="flex flex-col gap-1">
-                                                <div className="flex items-center gap-1 text-xs text-gray-600">
-                                                    <Truck size={12} className="text-blue-500" />
-                                                    Saída: {formatDate(schedule.medtruckDisplacementStart)}
-                                                </div>
-                                                <div className="flex items-center gap-1 text-xs text-gray-600">
-                                                    <Truck size={12} className="text-green-500" />
-                                                    Chegada: {formatDate(schedule.medtruckDisplacementEnd)}
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="p-4">
-                                            <div className="flex flex-col gap-1">
-                                                <div className="text-xs text-gray-600">
-                                                    <span className="font-medium">Mont:</span> {formatDate(schedule.setupDate)}
-                                                </div>
-                                                <div className="text-xs text-gray-600">
-                                                    <span className="font-medium">Desm:</span> {formatDate(schedule.teardownDate)}
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="p-4">
-                                            <div className="flex flex-col gap-1">
-                                                <div className="text-xs text-gray-600">
-                                                    {formatDate(schedule.theoryStart)} - {formatDate(schedule.theoryEnd)}
-                                                </div>
-                                                <div className="flex items-center gap-1 text-xs text-gray-500">
-                                                    <Users size={12} />
-                                                    {schedule.theoryStudentCount} alunos
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="p-4">
-                                            <div className="flex flex-col gap-1">
-                                                <div className="text-xs text-gray-600">
-                                                    {formatDate(schedule.practiceStart)} - {formatDate(schedule.practiceEnd)}
-                                                </div>
-                                                <div className="flex items-center gap-1 text-xs text-gray-500">
-                                                    <Users size={12} />
-                                                    {schedule.practiceStudentCount} alunos
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="p-4">
-                                            <div className="font-medium text-gray-900">{schedule.location}</div>
-                                            <div className="text-xs text-gray-500">{schedule.studentLocality}</div>
-                                        </td>
-                                        <td className="p-4 text-right">
-                                            <div className="flex justify-end gap-2">
-                                                <button
-                                                    onClick={() => handleOpenModal(schedule)}
-                                                    className="p-1 text-blue-600 hover:bg-blue-50 rounded transition-colors"
-                                                    title="Editar"
-                                                >
-                                                    <Edit2 size={16} />
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDelete(schedule.id)}
-                                                    className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors"
-                                                    title="Excluir"
-                                                >
-                                                    <Trash2 size={16} />
-                                                </button>
-                                            </div>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100">
+                                {filteredSchedules.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={7} className="p-8 text-center text-gray-500">
+                                            Nenhum agendamento encontrado.
                                         </td>
                                     </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
+                                ) : (
+                                    filteredSchedules.map((schedule) => (
+                                        <tr key={schedule.id} className="hover:bg-gray-50 transition-colors stagger-item">
+                                            <td className="p-4">
+                                                <div className="font-medium text-gray-900">{schedule.className}</div>
+                                                <div className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                                                    <MapPin size={12} />
+                                                    {schedule.origin} ➝ {schedule.destination}
+                                                </div>
+                                            </td>
+                                            <td className="p-4">
+                                                <div className="flex flex-col gap-1">
+                                                    <div className="flex items-center gap-1 text-xs text-gray-600">
+                                                        <Truck size={12} className="text-blue-500" />
+                                                        Saída: {formatDate(schedule.medtruckDisplacementStart)}
+                                                    </div>
+                                                    <div className="flex items-center gap-1 text-xs text-gray-600">
+                                                        <Truck size={12} className="text-green-500" />
+                                                        Chegada: {formatDate(schedule.medtruckDisplacementEnd)}
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="p-4">
+                                                <div className="flex flex-col gap-1">
+                                                    <div className="text-xs text-gray-600">
+                                                        <span className="font-medium">Mont:</span> {formatDate(schedule.setupDate)}
+                                                    </div>
+                                                    <div className="text-xs text-gray-600">
+                                                        <span className="font-medium">Desm:</span> {formatDate(schedule.teardownDate)}
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="p-4">
+                                                <div className="flex flex-col gap-1">
+                                                    <div className="text-xs text-gray-600">
+                                                        {formatDate(schedule.theoryStart)} - {formatDate(schedule.theoryEnd)}
+                                                    </div>
+                                                    <div className="flex items-center gap-1 text-xs text-gray-500">
+                                                        <Users size={12} />
+                                                        {schedule.theoryStudentCount} alunos
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="p-4">
+                                                <div className="flex flex-col gap-1">
+                                                    <div className="text-xs text-gray-600">
+                                                        {formatDate(schedule.practiceStart)} - {formatDate(schedule.practiceEnd)}
+                                                    </div>
+                                                    <div className="flex items-center gap-1 text-xs text-gray-500">
+                                                        <Users size={12} />
+                                                        {schedule.practiceStudentCount} alunos
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="p-4">
+                                                <div className="font-medium text-gray-900">{schedule.location}</div>
+                                                <div className="text-xs text-gray-500">{schedule.studentLocality}</div>
+                                            </td>
+                                            <td className="p-4 text-right">
+                                                <div className="flex justify-end gap-2">
+                                                    <button
+                                                        onClick={() => handleOpenModal(schedule)}
+                                                        className="p-1 text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                                                        title="Editar"
+                                                    >
+                                                        <Edit2 size={16} />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDelete(schedule.id)}
+                                                        className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors"
+                                                        title="Excluir"
+                                                    >
+                                                        <Trash2 size={16} />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            </div>
+            ) : (
+                <TimelineView />
+            )}
 
             {/* Modal */}
             {isModalOpen && (

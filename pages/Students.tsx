@@ -138,7 +138,7 @@ export const StudentsPage: React.FC = () => {
             id: editingId || Math.random().toString(36).substr(2, 9),
             name: studentForm.name || '',
             cpf: studentForm.cpf || '',
-            classId: studentForm.classId,
+            classId: studentForm.classId || undefined, // Ensure undefined if empty string
             enrollmentStatus: studentForm.enrollmentStatus as EnrollmentStatus,
             rg: studentForm.rg || '',
             rgIssuer: studentForm.rgIssuer || '',

@@ -1,7 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, Course, ClassGroup, Student, Task, UserRole, AttendanceLog, GradeLog, PaymentRecord, ChecklistTemplate, ChecklistLog, Notification, SwapRequest, Firefighter, FirefighterLog, Base, Folder, DocumentFile, SetupTeardownAssignment, Question, QuestionReview, QuestionApprover, TrainingSchedule } from '../types';
-import { initialUsers, initialCourses, initialClasses, initialStudents, initialTasks, initialAttendance, initialGradeLogs, initialPayments, initialChecklistTemplates, initialChecklistLogs, initialNotifications, initialSwapRequests, initialFirefighters, initialFirefighterLogs, initialBases } from '../services/mockData';
+
 import { supabase, isSupabaseConfigured } from '../services/supabase';
 import { mapStudentFromDB, mapStudentToDB, mapTaskFromDB, mapTaskToDB, mapAttendanceLogFromDB, mapAttendanceLogToDB, mapGradeLogFromDB, mapGradeLogToDB, mapPaymentFromDB, mapPaymentToDB, mapChecklistTemplateFromDB, mapChecklistTemplateToDB, mapChecklistLogFromDB, mapChecklistLogToDB, mapFirefighterFromDB, mapFirefighterToDB, mapFirefighterLogFromDB, mapFirefighterLogToDB, mapBaseFromDB, mapBaseToDB, mapUserFromDB, mapUserToDB } from '../services/dataMappers';
 
@@ -294,44 +294,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }, []);
 
     const seedDatabase = async () => {
-        console.log("🌱 Database appears incomplete. Seeding initial data...");
-        try {
-            const options = { onConflict: 'id', ignoreDuplicates: true };
-
-            const mappedUsers = initialUsers.map(mapUserToDB);
-            await supabase.from('users').upsert(mappedUsers, options);
-
-            const mappedCourses = initialCourses.map(mapCourseToDB);
-            await supabase.from('courses').upsert(mappedCourses, options);
-
-            const mappedClasses = initialClasses.map(mapClassToDB);
-            await supabase.from('classes').upsert(mappedClasses, options);
-
-            const mappedStudents = initialStudents.map(mapStudentToDB);
-            await supabase.from('students').upsert(mappedStudents, options);
-
-            const mappedTasks = initialTasks.map(mapTaskToDB);
-            await supabase.from('tasks').upsert(mappedTasks, options);
-
-            const mappedAttendance = initialAttendance.map(mapAttendanceLogToDB);
-            await supabase.from('attendance_logs').upsert(mappedAttendance, options);
-
-            const mappedGradeLogs = initialGradeLogs.map(mapGradeLogToDB);
-            await supabase.from('grade_logs').upsert(mappedGradeLogs, options);
-
-            const mappedTemplates = initialChecklistTemplates.map(mapChecklistTemplateToDB);
-            await supabase.from('checklist_templates').upsert(mappedTemplates, options);
-
-            const mappedBases = initialBases.map(mapBaseToDB);
-            await supabase.from('bases').upsert(mappedBases, options);
-
-            const mappedFirefighters = initialFirefighters.map(mapFirefighterToDB);
-            await supabase.from('firefighters').upsert(mappedFirefighters, options);
-
-            console.log("✅ Database seeded successfully.");
-        } catch (e) {
-            console.error("❌ Error seeding database:", e);
-        }
+        console.log("🌱 Database seeding is disabled.");
     };
 
     const fetchInitialData = async () => {
@@ -354,10 +317,10 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                 const { count: courseCount } = await supabase.from('courses').select('*', { count: 'exact', head: true });
                 const { count: classCount } = await supabase.from('classes').select('*', { count: 'exact', head: true });
 
-                // SEED DISABLED - No longer auto-inserting example data
-                if ((userCount === 0 || courseCount === 0 || classCount === 0)) {
-                    await seedDatabase();
-                }
+                // SEED DISABLED
+                // if ((userCount === 0 || courseCount === 0 || classCount === 0)) {
+                //    await seedDatabase();
+                // }
 
                 // Helper to safe fetch WITHOUT fallback to mock data (Exclusive Persistence)
                 const safeFetch = async (table: string, setter: any, mapper?: (data: any) => any) => {
