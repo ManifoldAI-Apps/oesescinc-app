@@ -94,12 +94,13 @@ export const CertificatesPage: React.FC = () => {
                 const matricula = s.matricula || `${formattedIndex}/${course.name.split(' ')[0]}/Nº${num}-${year}`;
 
                 const seqReg = baseReg + index;
-                const registro = s.registro || `08/${courseLetter}${seqReg}/${year}`;
+                const formattedSeqReg = seqReg.toString().padStart(4, '0');
+                const registro = s.registro || `08/${courseLetter}${formattedSeqReg}/${year}`;
 
                 let capBa = s.capCode || '-';
                 if (course.type !== CourseType.CBA_CE && !s.capCode) {
-                    const seqCap = baseCap + index;
-                    capBa = `08/C${seqCap}/${year}`;
+                    const formattedSeqCap = seqCap.toString().padStart(4, '0');
+                    capBa = `08/C${formattedSeqCap}/${year}`;
                 }
 
                 allCertificates.push({

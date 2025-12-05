@@ -57,15 +57,14 @@ export const Login: React.FC = () => {
       <div className="fire-bottom-glow"></div>
 
       <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10 animate-slide-down flex flex-col items-center">
-        <div className="bg-white p-4 rounded-full shadow-lg mb-6 ring-4 ring-orange-100 animate-pulse-slow">
-          <Flame size={48} className="text-orange-600 fill-orange-500" />
+        <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10 animate-slide-down flex flex-col items-center">
+          <h2 className="text-center text-4xl font-extrabold text-gray-900 tracking-tight mb-2">
+            OE-SESCINC <span className="text-primary-600">Med+ Group</span>
+          </h2>
+          <p className="mt-2 text-center text-sm text-gray-600 font-medium">
+            Sistema de Gestão de Ensino
+          </p>
         </div>
-        <h2 className="text-center text-4xl font-extrabold text-gray-900 tracking-tight">
-          OE-SESCINC <span className="text-primary-600">Med+ Group</span>
-        </h2>
-        <p className="mt-2 text-center text-sm text-gray-600 font-medium">
-          Sistema de Gestão de Ensino
-        </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md relative z-10 animate-scale-in">

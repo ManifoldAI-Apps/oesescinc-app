@@ -105,9 +105,8 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
       `}>
         {/* Header Logo */}
         <div className="h-16 flex items-center px-6 border-b border-orange-100 bg-white flex-shrink-0">
-          <div className="flex items-center space-x-2 text-primary-600">
-            <Flame size={28} className="fill-orange-500 text-orange-600 animate-pulse-slow" />
-            <span className="text-sm font-extrabold tracking-tight text-gray-900 leading-tight">
+          <div className="flex items-center justify-center w-full text-primary-600">
+            <span className="text-sm font-extrabold tracking-tight text-gray-900 leading-tight text-center">
               OE-SESCINC <br /><span className="bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-orange-500">Med+ Group</span>
             </span>
           </div>

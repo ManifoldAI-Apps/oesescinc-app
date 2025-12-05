@@ -96,7 +96,7 @@ export const StudentsPage: React.FC = () => {
                 // 1. Matrícula: xx (2 digits) / Nome do Curso / Nº Turma - Ano
                 // Ex: 35/CBA-AT/Nº20-2025
                 const formattedIndex = listIndex.toString().padStart(2, '0');
-                const matricula = `${formattedIndex} /${course?.name.split(' ')[0] || 'CURSO'}/Nº${num} -${year} `;
+                const matricula = `${formattedIndex}/${course?.name.split(' ')[0] || 'CURSO'}/Nº${num}-${year}`;
 
                 let registro = '-';
                 let capCode = '-';
@@ -109,7 +109,7 @@ export const StudentsPage: React.FC = () => {
                     const baseReg = parseInt(cls.registrationNumber || '0');
                     const seqReg = baseReg + validStudentCounter - 1;
                     const formattedSeqReg = seqReg.toString().padStart(4, '0'); // 4 dígitos
-                    registro = `08 / ${courseLetter}${formattedSeqReg}/${year}`;
+                    registro = `08/${courseLetter}${formattedSeqReg}/${year}`;
 
                     // 3. CAP-BA: 08/C + (Base + Sequencia - 1) / Ano (Skip for CBA-CE)
                     if (course?.type !== CourseType.CBA_CE) {

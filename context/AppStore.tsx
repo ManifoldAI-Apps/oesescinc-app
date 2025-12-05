@@ -486,7 +486,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
 
     const updateUser = async (user: User) => {
-        setUsers(users.map(u => u.id === user.id ? user : u));
+        setUsers(prev => prev.map(u => u.id === user.id ? user : u));
         if (currentUser?.id === user.id) {
             setCurrentUser(user);
             localStorage.setItem('medgroup_user', JSON.stringify(user));
@@ -531,7 +531,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
 
     const updateCourse = async (course: Course) => {
-        setCourses(courses.map(c => c.id === course.id ? course : c));
+        setCourses(prev => prev.map(c => c.id === course.id ? course : c));
         await syncWithSupabase('courses', 'UPDATE', mapCourseToDB(course));
     };
 
@@ -549,7 +549,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
 
     const updateClass = async (cls: ClassGroup) => {
-        setClasses(classes.map(c => c.id === cls.id ? cls : c));
+        setClasses(prev => prev.map(c => c.id === cls.id ? cls : c));
         const dbData = mapClassToDB(cls);
         await syncWithSupabase('classes', 'UPDATE', dbData);
     };
@@ -565,7 +565,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
 
     const updateStudent = async (student: Student) => {
-        setStudents(students.map(s => s.id === student.id ? student : s));
+        setStudents(prev => prev.map(s => s.id === student.id ? student : s));
         await syncWithSupabase('students', 'UPDATE', mapStudentToDB(student));
     };
 
@@ -609,7 +609,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     const updateTask = async (task: Task) => {
         const oldTask = tasks.find(t => t.id === task.id);
-        setTasks(tasks.map(t => t.id === task.id ? task : t));
+        setTasks(prev => prev.map(t => t.id === task.id ? task : t));
         await syncWithSupabase('tasks', 'UPDATE', mapTaskToDB(task));
 
         // Notify completion to creator
@@ -676,7 +676,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
 
     const updateChecklistTemplate = async (template: ChecklistTemplate) => {
-        setChecklistTemplates(checklistTemplates.map(t => t.id === template.id ? template : t));
+        setChecklistTemplates(prev => prev.map(t => t.id === template.id ? template : t));
         await syncWithSupabase('checklist_templates', 'UPDATE', mapChecklistTemplateToDB(template));
     };
 
@@ -766,7 +766,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
 
     const updateFirefighter = async (ff: Firefighter) => {
-        setFirefighters(firefighters.map(f => f.id === ff.id ? ff : f));
+        setFirefighters(prev => prev.map(f => f.id === ff.id ? ff : f));
         await syncWithSupabase('firefighters', 'UPDATE', mapFirefighterToDB(ff));
     };
 
