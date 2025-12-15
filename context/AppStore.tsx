@@ -685,8 +685,13 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     const addPayment = async (payment: PaymentRecord) => {
         console.log('💳 Adding payment to state:', payment);
-        // Update state first so UI updates immediately
-        setPayments([...payments, payment]);
+        // Use functional update to ensure we always work with latest state
+        setPayments(prevPayments => {
+            console.log('📊 Current payments count:', prevPayments.length);
+            const newPayments = [...prevPayments, payment];
+            console.log('📊 New payments count:', newPayments.length);
+            return newPayments;
+        });
 
         // Then try to sync with Supabase (if configured)
         try {
