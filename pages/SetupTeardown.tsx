@@ -10,6 +10,7 @@ export const SetupTeardownPage: React.FC = () => {
     const [editingId, setEditingId] = useState<string | null>(null);
     const [filterClass, setFilterClass] = useState('');
     const [filterType, setFilterType] = useState<'' | 'Montagem' | 'Desmontagem'>('');
+    const [selectedAssignments, setSelectedAssignments] = useState<string[]>([]); // Para pagamento em lote
 
     // Form state
     const [formData, setFormData] = useState({
@@ -23,14 +24,22 @@ export const SetupTeardownPage: React.FC = () => {
     if (!currentUser) return null;
 
     const canManage = currentUser.role === UserRole.GESTOR || currentUser.role === UserRole.COORDENADOR;
-    const instructors = users.filter(u => u.role === UserRole.INSTRUTOR || u.role === UserRole.AUXILIAR_INSTRUCAO);
+    const instructors = users
+        .filter(u =>
+            u.role === UserRole.INSTRUTOR ||
+            u.role === UserRole.GESTOR ||
+            u.role === UserRole.COORDENADOR
+        )
+        .sort((a, b) => a.name.localeCompare(b.name)); // Ordem alfabética
 
     const filteredAssignments = useMemo(() => {
-        return setupTeardownAssignments.filter(a => {
-            if (filterClass && a.classId !== filterClass) return false;
-            if (filterType && a.type !== filterType) return false;
-            return true;
-        });
+        return setupTeardownAssignments
+            .filter(a => {
+                if (filterClass && a.classId !== filterClass) return false;
+                if (filterType && a.type !== filterType) return false;
+                return true;
+            })
+            .sort((a, b) => a.className.localeCompare(b.className)); // Ordenar por turma
     }, [setupTeardownAssignments, filterClass, filterType]);
 
     const totalValue = filteredAssignments.reduce((sum, a) => sum + a.totalValue, 0);
@@ -119,6 +128,60 @@ export const SetupTeardownPage: React.FC = () => {
         link.click();
     };
 
+    const handleBatchPayment = async () => {
+        if (selectedAssignments.length === 0) return;
+        if (!window.confirm(`Confirma o pagamento de ${selectedAssignments.length} atribuições selecionadas?`)) return;
+
+        console.log('🔄 Processing batch payments for:', selectedAssignments.length, 'assignments');
+
+        try {
+            for (const assignmentId of selectedAssignments) {
+                const assignment = filteredAssignments.find(a => a.id === assignmentId);
+                console.log('📋 Processing assignment:', assignment);
+
+                if (assignment) {
+                    const isPaid = payments.some(p => p.scheduleItemId === assignment.id);
+                    if (!isPaid) {
+                        const payment = {
+                            id: Math.random().toString(36).substr(2, 9),
+                            scheduleItemId: assignment.id,
+                            instructorId: assignment.instructorId,
+                            amount: assignment.totalValue,
+                            datePaid: new Date().toISOString(),
+                            paidBy: currentUser.id
+                        };
+                        console.log('💰 Creating payment:', payment);
+                        await addPayment(payment);
+                        console.log('✅ Payment added successfully');
+                    }
+                }
+            }
+            setSelectedAssignments([]);
+            console.log('✅ All batch payments processed successfully');
+            alert('Pagamentos registrados com sucesso!');
+        } catch (error) {
+            console.error('❌ Error processing batch payments:', error);
+            alert('Pagamentos foram salvos localmente, mas houve um problema ao sincronizar com o servidor.');
+        }
+    };
+
+    const toggleSelection = (id: string) => {
+        setSelectedAssignments(prev =>
+            prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+        );
+    };
+
+    const toggleSelectAll = () => {
+        const pendingAssignments = filteredAssignments.filter(a =>
+            !payments.some(p => p.scheduleItemId === a.id)
+        );
+        if (selectedAssignments.length === pendingAssignments.length) {
+            setSelectedAssignments([]);
+        } else {
+            setSelectedAssignments(pendingAssignments.map(a => a.id));
+        }
+    };
+
     return (
         <div className="space-y-8 animate-fade-in">
             {/* Header */}
@@ -135,6 +198,15 @@ export const SetupTeardownPage: React.FC = () => {
                         <Download size={18} />
                         Exportar CSV
                     </button>
+                    {canManage && selectedAssignments.length > 0 && (
+                        <button
+                            onClick={handleBatchPayment}
+                            className="btn-premium bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white px-4 py-2 rounded-lg transition-all duration-200 flex items-center gap-2 text-sm shadow-md"
+                        >
+                            <DollarSign size={16} />
+                            Pagar {selectedAssignments.length} item(ns)
+                        </button>
+                    )}
                     {canManage && (
                         <button
                             onClick={() => handleOpenModal()}
@@ -246,6 +318,16 @@ export const SetupTeardownPage: React.FC = () => {
                     <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-50">
                             <tr>
+                                {canManage && (
+                                    <th className="px-4 py-4 text-center text-xs font-bold text-gray-500 uppercase tracking-wider w-12">
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedAssignments.length > 0 && selectedAssignments.length === filteredAssignments.filter(a => !payments.some(p => p.scheduleItemId === a.id)).length}
+                                            onChange={toggleSelectAll}
+                                            className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                                        />
+                                    </th>
+                                )}
                                 <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Turma</th>
                                 <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Tipo</th>
                                 <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Instrutor</th>
@@ -259,7 +341,7 @@ export const SetupTeardownPage: React.FC = () => {
                         <tbody className="bg-white divide-y divide-gray-200">
                             {filteredAssignments.length === 0 ? (
                                 <tr>
-                                    <td colSpan={canManage ? 8 : 7} className="px-6 py-12 text-center text-gray-500">
+                                    <td colSpan={canManage ? 9 : 7} className="px-6 py-12 text-center text-gray-500">
                                         <div className="flex flex-col items-center justify-center">
                                             <Wrench className="text-gray-300 mb-3" size={48} />
                                             <p className="text-lg font-medium text-gray-900">Nenhuma atribuição encontrada</p>
@@ -272,6 +354,18 @@ export const SetupTeardownPage: React.FC = () => {
                                     const isPaid = payments.some(p => p.scheduleItemId === assignment.id);
                                     return (
                                         <tr key={assignment.id} className="hover:bg-gray-50 transition-colors group">
+                                            {canManage && (
+                                                <td className="px-4 py-4 text-center">
+                                                    {!isPaid && (
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={selectedAssignments.includes(assignment.id)}
+                                                            onChange={() => toggleSelection(assignment.id)}
+                                                            className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                                                        />
+                                                    )}
+                                                </td>
+                                            )}
                                             <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">{assignment.className}</td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <span className={`inline-flex items-center px-2.5 py-1 text-xs font-bold rounded-full border ${assignment.type === 'Montagem'
