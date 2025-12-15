@@ -323,23 +323,23 @@ export const SetupTeardownPage: React.FC = () => {
                         <thead className="bg-gray-50">
                             <tr>
                                 {canManage && (
-                                    <th className="px-4 py-4 text-center text-xs font-bold text-gray-500 uppercase tracking-wider w-12">
+                                    <th className="px-4 py-3 text-center w-10">
                                         <input
                                             type="checkbox"
                                             checked={selectedAssignments.length > 0 && selectedAssignments.length === filteredAssignments.filter(a => !payments.some(p => p.scheduleItemId === a.id)).length}
                                             onChange={toggleSelectAll}
-                                            className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                                            className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
                                         />
                                     </th>
                                 )}
-                                <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Turma</th>
-                                <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Tipo</th>
-                                <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Instrutor</th>
-                                <th className="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Dias</th>
-                                <th className="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Valor Total</th>
-                                <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Data</th>
-                                <th className="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Status Pagamento</th>
-                                {canManage && <th className="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Ações</th>}
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Turma</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tipo</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Instrutor</th>
+                                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Dias</th>
+                                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Valor Total</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Data</th>
+                                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Status</th>
+                                {canManage && <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Ações</th>}
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
@@ -357,7 +357,7 @@ export const SetupTeardownPage: React.FC = () => {
                                 filteredAssignments.map(assignment => {
                                     const isPaid = payments.some(p => p.scheduleItemId === assignment.id);
                                     return (
-                                        <tr key={assignment.id} className="hover:bg-gray-50 transition-colors group">
+                                        <tr key={assignment.id} className="hover:bg-gray-50">
                                             {canManage && (
                                                 <td className="px-4 py-4 text-center">
                                                     {!isPaid && (
@@ -365,12 +365,12 @@ export const SetupTeardownPage: React.FC = () => {
                                                             type="checkbox"
                                                             checked={selectedAssignments.includes(assignment.id)}
                                                             onChange={() => toggleSelection(assignment.id)}
-                                                            className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                                                            className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
                                                         />
                                                     )}
                                                 </td>
                                             )}
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">{assignment.className}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{assignment.className}</td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <span className={`inline-flex items-center px-2.5 py-1 text-xs font-bold rounded-full border ${assignment.type === 'Montagem'
                                                     ? 'bg-blue-50 text-blue-700 border-blue-200'
