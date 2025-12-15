@@ -92,8 +92,10 @@ export const FinancePage: React.FC = () => {
                 const valuePerInstructor = item.duration * rate;
 
                 instructorIdsToProcess.forEach(instId => {
+                    // Skip unassigned instructors
+                    if (instId === 'unassigned') return;
+
                     // Security: If current user is instructor, strictly filter early
-                    // Allow 'unassigned' to pass through for Admins, but likely hide for Instructors (optional, currently hiding)
                     if (isInstructor && instId !== currentUser.id) return;
 
                     const instructorUser = instId === 'unassigned' ? null : users.find(u => u.id === instId);
