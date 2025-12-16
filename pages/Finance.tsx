@@ -36,7 +36,8 @@ export const FinancePage: React.FC = () => {
     const [classFilter, setClassFilter] = useState('');
     const [monthFilter, setMonthFilter] = useState(''); // Default to ALL to match Dashboard
     const [yearFilter, setYearFilter] = useState('');   // Default to ALL to match Dashboard
-    const [showSetupTeardown, setShowSetupTeardown] = useState(true); // Toggle for Setup/Teardown
+    const [showSetupTeardown, setShowSetupTeardown] = useState(true); // Toggle for Setup/Teardown (Extract)
+    const [showPerformanceSetup, setShowPerformanceSetup] = useState(false); // Toggle for Setup/Teardown (Performance)
 
     if (!currentUser) return null;
 
@@ -130,7 +131,8 @@ export const FinancePage: React.FC = () => {
                         rate: effectiveRate,
                         value: effectiveValue,
                         status: isPaid ? 'Pago' : 'Pendente',
-                        paymentDate: paymentRecord?.datePaid
+                        paymentDate: paymentRecord?.datePaid,
+                        paymentId: paymentRecord?.id
                     });
                 });
             });
@@ -168,11 +170,19 @@ export const FinancePage: React.FC = () => {
             });
         });
 
-        // Sort by date desc (Newest to Oldest)
+        // Sort by Class Name Asc -> Instructor Name Asc -> Date Desc
         return items.sort((a, b) => {
+            // 1. Class Name (Alphabetical)
+            const classComparison = a.className.localeCompare(b.className);
+            if (classComparison !== 0) return classComparison;
+
+            // 2. Instructor Name (Alphabetical)
+            const instructorComparison = a.instructorName.localeCompare(b.instructorName);
+            if (instructorComparison !== 0) return instructorComparison;
+
+            // 3. Date (Newest first) - as final tiebreaker
             const dateA = new Date(a.date).getTime();
             const dateB = new Date(b.date).getTime();
-            // Handle invalid dates by treating them as old
             const timeA = isNaN(dateA) ? 0 : dateA;
             const timeB = isNaN(dateB) ? 0 : dateB;
             return timeB - timeA;
@@ -235,6 +245,9 @@ export const FinancePage: React.FC = () => {
         } = {};
 
         rawFinancialItems.forEach(item => {
+            // Filter out setup/teardown if toggle is off
+            if (!showPerformanceSetup && (item.type === 'Montagem' || item.type === 'Desmontagem')) return;
+
             if (!statsMap[item.instructorId]) {
                 statsMap[item.instructorId] = {
                     id: item.instructorId,
@@ -319,9 +332,8 @@ export const FinancePage: React.FC = () => {
         if (!canManagePayments) return;
 
         if (item.status === 'Pago' && item.paymentId) {
-            if (confirm('Deseja cancelar o pagamento deste item?')) {
-                await deletePayment(item.paymentId);
-            }
+            // Updated to remove confirmation as requested
+            await deletePayment(item.paymentId);
         } else if (item.status === 'Pendente') {
             const payment: PaymentRecord = {
                 id: Math.random().toString(36).substr(2, 9),
@@ -422,6 +434,18 @@ export const FinancePage: React.FC = () => {
                     <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-2 bg-gray-50">
                         <BarChart2 size={18} className="text-gray-500" />
                         <h3 className="font-bold text-gray-800">Desempenho dos Instrutores (Geral)</h3>
+                        <div className="ml-auto">
+                            <button
+                                onClick={() => setShowPerformanceSetup(!showPerformanceSetup)}
+                                className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${showPerformanceSetup
+                                    ? 'bg-indigo-100 text-indigo-700 border border-indigo-200'
+                                    : 'bg-gray-100 text-gray-600 border border-gray-200 hover:bg-gray-200'
+                                    }`}
+                            >
+                                <Wrench size={14} />
+                                {showPerformanceSetup ? 'Ocultar Montagem' : 'Mostrar Montagem'}
+                            </button>
+                        </div>
                     </div>
                     <div className="overflow-x-auto">
                         <table className="min-w-full divide-y divide-gray-200">
@@ -653,17 +677,19 @@ export const FinancePage: React.FC = () => {
                                             R$ {log.value.toFixed(2)}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-center">
-                                            <button
-                                                onClick={() => handleTogglePaymentStatus(log)}
-                                                disabled={!canManagePayments}
-                                                className={`px-2 py-1 rounded-full text-xs font-bold transition-colors ${log.status === 'Pago'
-                                                    ? 'bg-green-100 text-green-800 hover:bg-green-200'
-                                                    : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
-                                                    }`}
-                                                title={canManagePayments ? "Clique para alterar status" : ""}
-                                            >
-                                                {log.status}
-                                            </button>
+                                            <div className="flex items-center justify-center gap-2">
+                                                <button
+                                                    onClick={() => handleTogglePaymentStatus(log)}
+                                                    disabled={!canManagePayments}
+                                                    className={`px-3 py-1 rounded-full text-xs font-bold transition-all transform hover:scale-105 ${log.status === 'Pago'
+                                                        ? 'bg-green-100 text-green-800 hover:bg-red-100 hover:text-red-800'
+                                                        : 'bg-yellow-100 text-yellow-800 hover:bg-green-100 hover:text-green-800'
+                                                        }`}
+                                                    title={canManagePayments ? (log.status === 'Pago' ? "Clique para cancelar (tornar pendente)" : "Clique para marcar como pago") : ""}
+                                                >
+                                                    {log.status === 'Pago' ? 'Pago' : 'Pendente'}
+                                                </button>
+                                            </div>
                                             {log.status === 'Pago' && log.paymentDate && (
                                                 <div className="text-[10px] text-gray-400 mt-1">
                                                     {formatDate(log.paymentDate)}

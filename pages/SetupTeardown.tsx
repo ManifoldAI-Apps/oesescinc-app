@@ -5,7 +5,7 @@ import { Wrench, Plus, Trash2, Edit2, DollarSign, Calendar, User, Download, Arro
 import { formatDate, getCurrentDateString } from '../utils/dateUtils';
 
 export const SetupTeardownPage: React.FC = () => {
-    const { currentUser, classes, users, setupTeardownAssignments, addSetupTeardownAssignment, updateSetupTeardownAssignment, deleteSetupTeardownAssignment, payments, addPayment } = useStore();
+    const { currentUser, classes, users, setupTeardownAssignments, addSetupTeardownAssignment, updateSetupTeardownAssignment, deleteSetupTeardownAssignment, payments, addPayment, deletePayment } = useStore();
     const [modalOpen, setModalOpen] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [filterClass, setFilterClass] = useState('');
@@ -31,6 +31,7 @@ export const SetupTeardownPage: React.FC = () => {
     const instructors = users
         .filter(u =>
             u.role === UserRole.INSTRUTOR ||
+            u.role === UserRole.AUXILIAR_INSTRUCAO ||
             u.role === UserRole.GESTOR ||
             u.role === UserRole.COORDENADOR
         )
@@ -196,6 +197,32 @@ export const SetupTeardownPage: React.FC = () => {
             setSelectedAssignments([]);
         } else {
             setSelectedAssignments(pendingAssignments.map(a => a.id));
+        }
+    };
+
+    const handlePaymentToggle = async (assignment: SetupTeardownAssignment) => {
+        if (!canManage) return;
+
+        console.log('🔄 Toggling payment for assignment:', assignment);
+        const payment = payments.find(p => p.scheduleItemId === assignment.id);
+        console.log('💰 Payment found:', payment);
+
+        if (payment) {
+            // Updated to remove confirmation as requested
+            console.log('❌ Deleting payment:', payment.id);
+            await deletePayment(payment.id);
+        } else {
+            // If Pending -> Pay
+            const newPayment = {
+                id: Math.random().toString(36).substr(2, 9),
+                scheduleItemId: assignment.id,
+                instructorId: assignment.instructorId,
+                amount: assignment.totalValue,
+                datePaid: new Date().toISOString(),
+                paidBy: currentUser.id
+            };
+            console.log('✅ Adding payment:', newPayment);
+            await addPayment(newPayment);
         }
     };
 
@@ -384,6 +411,7 @@ export const SetupTeardownPage: React.FC = () => {
                                                 </td>
                                             )}
                                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{assignment.className}</td>
+
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <span className={`inline-flex items-center px-2.5 py-1 text-xs font-bold rounded-full border ${assignment.type === 'Montagem'
                                                     ? 'bg-blue-50 text-blue-700 border-blue-200'
@@ -411,12 +439,17 @@ export const SetupTeardownPage: React.FC = () => {
                                                 {formatDate(assignment.date)}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-center">
-                                                <span className={`inline-flex items-center px-2.5 py-1 text-xs font-bold rounded-full ${isPaid
-                                                    ? 'bg-green-100 text-green-800'
-                                                    : 'bg-yellow-100 text-yellow-800'
-                                                    }`}>
+                                                <button
+                                                    onClick={() => handlePaymentToggle(assignment)}
+                                                    disabled={!canManage}
+                                                    className={`px-3 py-1 rounded-full text-xs font-bold transition-all transform hover:scale-105 ${isPaid
+                                                        ? 'bg-green-100 text-green-800 hover:bg-red-100 hover:text-red-800'
+                                                        : 'bg-yellow-100 text-yellow-800 hover:bg-green-100 hover:text-green-800'
+                                                        } ${!canManage ? 'cursor-default hover:scale-100' : 'cursor-pointer'}`}
+                                                    title={canManage ? (isPaid ? "Clique para cancelar pagamento" : "Clique para registrar pagamento") : ""}
+                                                >
                                                     {isPaid ? 'Pago' : 'Pendente'}
-                                                </span>
+                                                </button>
                                             </td>
                                             {canManage && (
                                                 <td className="px-6 py-4 whitespace-nowrap text-center text-sm flex justify-center gap-2">

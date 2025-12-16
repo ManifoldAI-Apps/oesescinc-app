@@ -131,7 +131,12 @@ export const QuestionBankPage: React.FC = () => {
         alert(`Questão ${action.toLowerCase()}!`);
     };
 
-    const instructors = users.filter(u => u.role === UserRole.INSTRUTOR);
+    const instructors = users.filter(u =>
+        u.role === UserRole.INSTRUTOR ||
+        u.role === UserRole.AUXILIAR_INSTRUCAO ||
+        u.role === UserRole.COORDENADOR ||
+        u.role === UserRole.GESTOR
+    );
 
     const getStatusColor = (status: QuestionStatus) => {
         switch (status) {

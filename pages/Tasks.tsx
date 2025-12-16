@@ -174,7 +174,11 @@ export const TasksPage: React.FC = () => {
 
     // Assignable Users: Instructors and Drivers
     const assignableUsers = users.filter(u =>
-        u.role === UserRole.INSTRUTOR || u.role === UserRole.MOTORISTA
+        u.role === UserRole.INSTRUTOR ||
+        u.role === UserRole.MOTORISTA ||
+        u.role === UserRole.AUXILIAR_INSTRUCAO ||
+        u.role === UserRole.COORDENADOR ||
+        u.role === UserRole.GESTOR
     );
 
     const canAssign = currentUser?.role === UserRole.GESTOR || currentUser?.role === UserRole.COORDENADOR;
