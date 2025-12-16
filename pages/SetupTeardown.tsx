@@ -10,6 +10,7 @@ export const SetupTeardownPage: React.FC = () => {
     const [editingId, setEditingId] = useState<string | null>(null);
     const [filterClass, setFilterClass] = useState('');
     const [filterType, setFilterType] = useState<'' | 'Montagem' | 'Desmontagem'>('');
+    const [filterInstructor, setFilterInstructor] = useState('');
     const [selectedAssignments, setSelectedAssignments] = useState<string[]>([]); // Para pagamento em lote
 
     // Pagination
@@ -45,10 +46,11 @@ export const SetupTeardownPage: React.FC = () => {
 
                 if (filterClass && a.classId !== filterClass) return false;
                 if (filterType && a.type !== filterType) return false;
+                if (filterInstructor && a.instructorId !== filterInstructor) return false;
                 return true;
             })
             .sort((a, b) => a.className.localeCompare(b.className)); // Ordenar por turma
-    }, [setupTeardownAssignments, filterClass, filterType, canManage, currentUser]);
+    }, [setupTeardownAssignments, filterClass, filterType, filterInstructor, canManage, currentUser]);
 
     const totalValue = filteredAssignments.reduce((sum, a) => sum + a.totalValue, 0);
 
@@ -321,7 +323,7 @@ export const SetupTeardownPage: React.FC = () => {
 
             {/* Filters */}
             <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                         <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Filtrar por Turma</label>
                         <div className="relative">
@@ -350,6 +352,22 @@ export const SetupTeardownPage: React.FC = () => {
                                 <option value="">Todos os Tipos</option>
                                 <option value="Montagem">Montagem</option>
                                 <option value="Desmontagem">Desmontagem</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Filtrar por Instrutor</label>
+                        <div className="relative">
+                            <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                            <select
+                                value={filterInstructor}
+                                onChange={(e) => setFilterInstructor(e.target.value)}
+                                className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all appearance-none"
+                            >
+                                <option value="">Todos os Instrutores</option>
+                                {instructors.map(i => (
+                                    <option key={i.id} value={i.id}>{i.name}</option>
+                                ))}
                             </select>
                         </div>
                     </div>

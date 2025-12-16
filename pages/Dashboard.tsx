@@ -196,36 +196,38 @@ export const Dashboard: React.FC = () => {
             {/* KPI Cards Row - Financials */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Card 1: Total Paid */}
-                <div className="stagger-item bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg p-6 text-white hover:shadow-2xl hover:scale-105 transition-all duration-300 cursor-pointer relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-full -mr-16 -mt-16"></div>
-                    <div className="flex justify-between items-start">
-                        <div>
-                            <p className="text-green-100 font-medium mb-1">Total Pago (Instrutores)</p>
-                            <h3 className="text-3xl font-bold">R$ {totalPaid.toLocaleString('pt-BR')}</h3>
+                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden group hover:shadow-md transition-all">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-green-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+                    <div className="relative z-10">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="p-3 bg-green-100 rounded-xl text-green-600">
+                                <DollarSign size={24} />
+                            </div>
+                            <span className="flex items-center text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-lg">
+                                <CheckCircle size={14} className="mr-1" />
+                                100% em dia
+                            </span>
                         </div>
-                        <div className="p-2 bg-white bg-opacity-20 rounded-lg">
-                            <DollarSign size={24} className="text-white" />
-                        </div>
-                    </div>
-                    <div className="mt-4 flex items-center text-sm text-green-100">
-                        <CheckCircle size={14} className="mr-1" /> 100% em dia
+                        <p className="text-sm font-medium text-gray-500 uppercase tracking-wide">Total Pago (Instrutores)</p>
+                        <h3 className="text-3xl font-bold text-gray-900 mt-1">R$ {totalPaid.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
                     </div>
                 </div>
 
                 {/* Card 2: Values to Pay */}
-                <div className="stagger-item bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl shadow-lg p-6 text-white hover:shadow-2xl hover:scale-105 transition-all duration-300 cursor-pointer relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-full -mr-16 -mt-16"></div>
-                    <div className="flex justify-between items-start">
-                        <div>
-                            <p className="text-orange-100 font-medium mb-1">Valores a Pagar</p>
-                            <h3 className="text-3xl font-bold">R$ {realPendingValue.toLocaleString('pt-BR')}</h3>
+                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden group hover:shadow-md transition-all">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-orange-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+                    <div className="relative z-10">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="p-3 bg-orange-100 rounded-xl text-orange-600">
+                                <DollarSign size={24} />
+                            </div>
+                            <span className="flex items-center text-xs font-bold text-orange-600 bg-orange-50 px-2 py-1 rounded-lg">
+                                <AlertCircle size={14} className="mr-1" />
+                                Pendente
+                            </span>
                         </div>
-                        <div className="p-2 bg-white bg-opacity-20 rounded-lg">
-                            <DollarSign size={24} className="text-white" />
-                        </div>
-                    </div>
-                    <div className="mt-4 flex items-center text-sm text-orange-100">
-                        <AlertCircle size={14} className="mr-1" /> Pendente
+                        <p className="text-sm font-medium text-gray-500 uppercase tracking-wide">Valores a Pagar</p>
+                        <h3 className="text-3xl font-bold text-gray-900 mt-1">R$ {realPendingValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
                     </div>
                 </div>
             </div>
@@ -241,7 +243,7 @@ export const Dashboard: React.FC = () => {
 
             {/* Lower Section: Recent Activity */}
             <div className="card-premium overflow-hidden animate-slide-up">
-                <div className="px-6 py-4 border-b border-gray-100 bg-gray-50">
+                <div className="px-6 py-4 border-b border-gray-100">
                     <h3 className="font-bold text-gray-800">Atividades Recentes</h3>
                 </div>
                 <div className="p-6">
@@ -255,12 +257,12 @@ export const Dashboard: React.FC = () => {
                                     bgColor: 'bg-green-50'
                                 })),
                                 ...notifications.filter(n => !n.read).slice(0, 3).map(n => ({
-                                    icon: <AlertCircle size={18} className="text-blue-600" />,
+                                    icon: <AlertCircle size={18} className="text-orange-500" />,
                                     title: n.title,
                                     time: new Date(n.timestamp).toLocaleString('pt-BR'),
-                                    bgColor: 'bg-blue-50'
+                                    bgColor: 'bg-orange-50'
                                 }))
-                            ].sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()).slice(0, 5);
+                            ].sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()).slice(0, 10);
 
                             if (recentActivities.length === 0) {
                                 return (
@@ -269,7 +271,7 @@ export const Dashboard: React.FC = () => {
                             }
 
                             return recentActivities.map((activity, i) => (
-                                <div key={i} className="flex items-center space-x-4 pb-4 border-b border-gray-100 last:border-0 last:pb-0 hover:bg-gray-50 -mx-6 px-6 py-3 transition-colors cursor-pointer rounded-lg">
+                                <div key={i} className="flex items-center space-x-4 pb-4 border-b border-gray-100 last:border-0 last:pb-0 hover:bg-orange-50 -mx-6 px-6 py-3 transition-colors cursor-pointer rounded-lg">
                                     <div className={`h-10 w-10 rounded-full ${activity.bgColor} flex items-center justify-center`}>
                                         {activity.icon}
                                     </div>

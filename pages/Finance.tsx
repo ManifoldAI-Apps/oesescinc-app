@@ -357,8 +357,8 @@ export const FinancePage: React.FC = () => {
             item.subject,
             item.modality,
             `${item.hours}h`,
-            item.rate.toString().replace('.', ','),
-            item.value.toString().replace('.', ','),
+            item.rate.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+            item.value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
             item.status
         ]);
 
@@ -389,42 +389,75 @@ export const FinancePage: React.FC = () => {
             {/* 1. Global Metrics Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {/* Hours */}
-                <div className="card-premium stagger-item p-6 relative overflow-hidden">
-                    <div className="flex items-center justify-between mb-2 relative z-10">
-                        <p className="text-gray-500 text-sm font-medium">Horas Totais (Filtrado)</p>
-                        <Clock size={18} className="text-blue-500" />
+                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden group hover:shadow-md transition-all">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+                    <div className="relative z-10">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="p-3 bg-blue-100 rounded-xl text-blue-600">
+                                <Clock size={24} />
+                            </div>
+                            <span className="flex items-center text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-lg">
+                                <Filter size={14} className="mr-1" />
+                                Horas
+                            </span>
+                        </div>
+                        <p className="text-sm font-medium text-gray-500 uppercase tracking-wide">Horas Totais</p>
+                        <h3 className="text-3xl font-bold text-gray-900 mt-1">{summary.totalHours}h</h3>
                     </div>
-                    <p className="text-2xl font-bold text-gray-900 relative z-10">{summary.totalHours}h</p>
                 </div>
 
                 {/* Pending Value */}
-                <div className="card-premium stagger-item p-6">
-                    <div className="flex items-center justify-between mb-2">
-                        <p className="text-gray-500 text-sm font-medium">A Pagar (Pendente)</p>
-                        <AlertCircle size={18} className="text-orange-500" />
+                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden group hover:shadow-md transition-all">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-orange-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+                    <div className="relative z-10">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="p-3 bg-orange-100 rounded-xl text-orange-600">
+                                <AlertCircle size={24} />
+                            </div>
+                            <span className="flex items-center text-xs font-bold text-orange-600 bg-orange-50 px-2 py-1 rounded-lg">
+                                <AlertCircle size={14} className="mr-1" />
+                                {summary.pendingHours}h
+                            </span>
+                        </div>
+                        <p className="text-sm font-medium text-gray-500 uppercase tracking-wide">A Pagar</p>
+                        <h3 className="text-3xl font-bold text-gray-900 mt-1">R$ {summary.pendingValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
                     </div>
-                    <p className="text-2xl font-bold text-orange-600">R$ {summary.pendingValue.toFixed(2)}</p>
-                    <p className="text-xs text-gray-400 mt-1">{summary.pendingHours}h pendentes</p>
                 </div>
 
                 {/* Paid Value */}
-                <div className="card-premium stagger-item p-6">
-                    <div className="flex items-center justify-between mb-2">
-                        <p className="text-gray-500 text-sm font-medium">Liquidado (Pago)</p>
-                        <Check size={18} className="text-green-500" />
+                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden group hover:shadow-md transition-all">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-green-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+                    <div className="relative z-10">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="p-3 bg-green-100 rounded-xl text-green-600">
+                                <Check size={24} />
+                            </div>
+                            <span className="flex items-center text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-lg">
+                                <Check size={14} className="mr-1" />
+                                {summary.paidHours}h
+                            </span>
+                        </div>
+                        <p className="text-sm font-medium text-gray-500 uppercase tracking-wide">Liquidado</p>
+                        <h3 className="text-3xl font-bold text-gray-900 mt-1">R$ {summary.paidValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
                     </div>
-                    <p className="text-2xl font-bold text-green-600">R$ {summary.paidValue.toFixed(2)}</p>
-                    <p className="text-xs text-gray-400 mt-1">{summary.paidHours}h pagas</p>
                 </div>
 
                 {/* Total Value */}
-                <div className="card-premium stagger-item p-6">
-                    <div className="flex items-center justify-between mb-2">
-                        <p className="text-gray-500 text-sm font-medium">Total Geral</p>
-                        <DollarSign size={18} className="text-gray-400" />
+                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden group hover:shadow-md transition-all">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-gray-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+                    <div className="relative z-10">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="p-3 bg-gray-100 rounded-xl text-gray-600">
+                                <DollarSign size={24} />
+                            </div>
+                            <span className="flex items-center text-xs font-bold text-gray-600 bg-gray-50 px-2 py-1 rounded-lg">
+                                <BarChart2 size={14} className="mr-1" />
+                                Total
+                            </span>
+                        </div>
+                        <p className="text-sm font-medium text-gray-500 uppercase tracking-wide">Total Geral</p>
+                        <h3 className="text-3xl font-bold text-gray-900 mt-1">R$ {summary.totalValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
                     </div>
-                    <p className="text-2xl font-bold text-gray-900">R$ {summary.totalValue.toFixed(2)}</p>
-                    <p className="text-xs text-gray-400 mt-1">Acumulado do período</p>
                 </div>
             </div>
 
@@ -481,13 +514,13 @@ export const FinancePage: React.FC = () => {
                                             {stat.totalHours}h
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-right font-bold text-green-600">
-                                            R$ {stat.paidValue.toFixed(2)}
+                                            R$ {stat.paidValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-right font-bold text-orange-600">
-                                            R$ {stat.pendingValue.toFixed(2)}
+                                            R$ {stat.pendingValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-right font-bold text-gray-900">
-                                            R$ {stat.totalValue.toFixed(2)}
+                                            R$ {stat.totalValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                         </td>
                                     </tr>
                                 ))}
@@ -671,7 +704,7 @@ export const FinancePage: React.FC = () => {
                                             {log.hours} h
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-500">
-                                            R$ {log.rate.toFixed(2)}
+                                            R$ {log.rate.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-right font-bold text-gray-900">
                                             R$ {log.value.toFixed(2)}

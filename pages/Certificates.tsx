@@ -46,7 +46,7 @@ export const CertificatesPage: React.FC = () => {
             const isClassFinished = new Date(cls.endDate) < today;
             const isApproved = s.enrollmentStatus === 'Aprovado';
 
-            return isClassFinished || isApproved;
+            return isApproved;
         });
 
         // 2. Group by Class to calculate indexes
@@ -131,7 +131,7 @@ export const CertificatesPage: React.FC = () => {
     });
 
     const handlePrint = (id: string) => {
-        alert('Funcionalidade de impressão de certificado em desenvolvimento.');
+        alert('Funcionalidade ainda não implementada.');
     };
 
     return (
@@ -198,14 +198,14 @@ export const CertificatesPage: React.FC = () => {
                                     <p className="text-sm text-gray-500">CPF: {formatCPF(cert.cpf)}</p>
                                     <div className="flex flex-wrap gap-2 mt-2">
                                         <span className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded text-xs border border-blue-100">
-                                            Mat: {cert.matricula}
+                                            Matrícula: {cert.matricula}
                                         </span>
                                         <span className="bg-green-50 text-green-700 px-2 py-0.5 rounded text-xs border border-green-100">
-                                            Reg: {cert.registro}
+                                            Registro: {cert.registro}
                                         </span>
                                         {cert.capBa && cert.capBa !== '-' && (
                                             <span className="bg-orange-50 text-orange-700 px-2 py-0.5 rounded text-xs border border-orange-100">
-                                                CAP: {cert.capBa}
+                                                CAP-BA: {cert.capBa}
                                             </span>
                                         )}
                                     </div>

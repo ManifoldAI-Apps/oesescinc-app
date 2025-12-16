@@ -79,6 +79,7 @@ interface StoreContextType {
     deleteUser: (id: string) => Promise<void>;
 
     addFolder: (folder: Folder) => Promise<void>;
+    updateFolder: (folder: Folder) => Promise<void>;
     deleteFolder: (id: string) => Promise<void>;
     addDocument: (doc: DocumentFile) => Promise<void>;
     deleteDocument: (id: string) => Promise<void>;
@@ -962,6 +963,32 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         await syncWithSupabase('bases', 'DELETE', null, id);
     };
 
+
+    const addFolder = async (folder: Folder) => {
+        setFolders([...folders, folder]);
+        await syncWithSupabase('folders', 'INSERT', mapFolderToDB(folder));
+    };
+
+    const updateFolder = async (folder: Folder) => {
+        setFolders(prev => prev.map(f => f.id === folder.id ? folder : f));
+        await syncWithSupabase('folders', 'UPDATE', mapFolderToDB(folder), folder.id);
+    };
+
+    const deleteFolder = async (id: string) => {
+        setFolders(folders.filter(f => f.id !== id));
+        await syncWithSupabase('folders', 'DELETE', null, id);
+    };
+
+    const addDocument = async (doc: DocumentFile) => {
+        setDocuments([...documents, doc]);
+        await syncWithSupabase('documents', 'INSERT', mapDocumentToDB(doc));
+    };
+
+    const deleteDocument = async (id: string) => {
+        setDocuments(documents.filter(d => d.id !== id));
+        await syncWithSupabase('documents', 'DELETE', null, id);
+    };
+
     return (
         <StoreContext.Provider value={{
             currentUser, users, courses, classes, students, tasks, attendanceLogs, gradeLogs, payments, checklistTemplates, checklistLogs, notifications, swapRequests, firefighters, firefighterLogs, bases, folders, documents, setupTeardownAssignments, questions, questionReviews, questionApprovers,
@@ -972,22 +999,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             addFirefighter, updateFirefighter, deleteFirefighter, addFirefighterLog,
             addBase, deleteBase, updateUser, deleteUser,
 
-            addFolder: async (folder: Folder) => {
-                setFolders([...folders, folder]);
-                await syncWithSupabase('folders', 'INSERT', mapFolderToDB(folder));
-            },
-            deleteFolder: async (id: string) => {
-                setFolders(folders.filter(f => f.id !== id));
-                await syncWithSupabase('folders', 'DELETE', null, id);
-            },
-            addDocument: async (doc: DocumentFile) => {
-                setDocuments([...documents, doc]);
-                await syncWithSupabase('documents', 'INSERT', mapDocumentToDB(doc));
-            },
-            deleteDocument: async (id: string) => {
-                setDocuments(documents.filter(d => d.id !== id));
-                await syncWithSupabase('documents', 'DELETE', null, id);
-            },
+            addFolder, updateFolder, deleteFolder, addDocument, deleteDocument,
 
 
 

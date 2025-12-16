@@ -243,7 +243,7 @@ export const CoursesPage: React.FC = () => {
                                 )}
                             </div>
 
-                            <div className="bg-gray-50 p-4 rounded mb-4 border border-gray-200">
+                            <div className="bg-orange-50 p-4 rounded mb-4 border border-orange-100">
                                 <h4 className="text-sm font-bold text-gray-700 mb-3 flex items-center">
                                     <Plus size={16} className="mr-1" /> Adicionar Matérias
                                 </h4>
@@ -380,7 +380,7 @@ export const CoursesPage: React.FC = () => {
             <div className="grid grid-cols-1 gap-6">
                 {courses.map(course => (
                     <div key={course.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group">
-                        <div className="bg-white px-6 py-5 border-b border-gray-100 flex justify-between items-center group-hover:bg-gray-50/50 transition-colors">
+                        <div className="bg-white px-6 py-5 border-b border-gray-100 flex justify-between items-center group-hover:bg-orange-50/50 transition-colors">
                             <div className="flex items-center space-x-3">
                                 <button
                                     onClick={() => toggleCourseExpansion(course.id)}
@@ -391,7 +391,7 @@ export const CoursesPage: React.FC = () => {
                                 </button>
                                 <div>
                                     <h3 className="text-lg font-bold text-gray-900">{course.name}</h3>
-                                    <span className="text-xs font-medium text-gray-500 bg-gray-200 px-2 py-0.5 rounded-full">{course.type}</span>
+
                                 </div>
                             </div>
                             <div className="flex items-center space-x-4">

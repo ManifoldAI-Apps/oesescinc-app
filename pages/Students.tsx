@@ -2,7 +2,7 @@
 import React, { useState, useMemo } from 'react';
 import { useStore } from '../context/AppStore';
 import { Student, CourseType, EnrollmentStatus } from '../types';
-import { Plus, Pencil, X, Trash2, Download, FileText, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, Pencil, X, Trash2, Download, FileText, ChevronLeft, ChevronRight, Upload } from 'lucide-react';
 import { formatCPF } from '../utils/formatters';
 import { formatDate } from '../utils/dateUtils';
 import jsPDF from 'jspdf';
@@ -239,9 +239,9 @@ export const StudentsPage: React.FC = () => {
                 `"${s.cpf}"`,
                 `"${s.registro}"`,
                 `"${s.capCode}"`,
-                s.finalTheory?.toFixed(1) || '-',
-                s.finalPractical?.toFixed(1) || '-',
-                s.finalGrade?.toFixed(1) || '-'
+                s.finalTheory?.toFixed(2) || '-',
+                s.finalPractical?.toFixed(2) || '-',
+                s.finalGrade?.toFixed(2) || '-'
             ].join(','))
         ].join('\n');
 
@@ -268,9 +268,9 @@ export const StudentsPage: React.FC = () => {
             formatCPF(s.cpf),
             s.registro,
             s.capCode,
-            s.finalTheory?.toFixed(1) || '-',
-            s.finalPractical?.toFixed(1) || '-',
-            s.finalGrade?.toFixed(1) || '-'
+            s.finalTheory?.toFixed(2) || '-',
+            s.finalPractical?.toFixed(2) || '-',
+            s.finalGrade?.toFixed(2) || '-'
         ]);
 
         autoTable(doc, {
@@ -356,22 +356,22 @@ export const StudentsPage: React.FC = () => {
                 </div>
                 <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
+                        <thead className="bg-orange-100 text-orange-900">
                             <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Matrícula</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Nome</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Turma</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Status</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">CPF</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Registro</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">CAP-BA</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium uppercase whitespace-nowrap">Matrícula</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium uppercase whitespace-nowrap">Nome</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium uppercase whitespace-nowrap">Turma</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium uppercase whitespace-nowrap">Status</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium uppercase whitespace-nowrap">CPF</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium uppercase whitespace-nowrap">Registro</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium uppercase whitespace-nowrap">CAP-BA</th>
 
                                 {/* Grade Columns */}
-                                <th className="px-4 py-3 text-center text-xs font-bold text-blue-700 uppercase bg-blue-50">Final Teórica</th>
-                                <th className="px-4 py-3 text-center text-xs font-bold text-orange-700 uppercase bg-orange-50">Final Prática</th>
-                                <th className="px-4 py-3 text-center text-xs font-bold text-gray-900 uppercase bg-gray-100">Nota Final</th>
+                                <th className="px-4 py-3 text-center text-xs font-bold uppercase">Final Teórica</th>
+                                <th className="px-4 py-3 text-center text-xs font-bold uppercase">Final Prática</th>
+                                <th className="px-4 py-3 text-center text-xs font-bold uppercase">Nota Final</th>
 
-                                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase whitespace-nowrap">Ações</th>
+                                <th className="px-6 py-3 text-right text-xs font-medium uppercase whitespace-nowrap">Ações</th>
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
@@ -384,7 +384,7 @@ export const StudentsPage: React.FC = () => {
                                 else if (s.enrollmentStatus === 'Pendente') statusColor = 'bg-yellow-100 text-yellow-800';
 
                                 return (
-                                    <tr key={s.id} className="hover:bg-gray-50 transition-colors group">
+                                    <tr key={s.id} className="hover:bg-orange-50 transition-colors group">
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{s.matricula}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{s.name}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{s.className}</td>
@@ -399,13 +399,13 @@ export const StudentsPage: React.FC = () => {
 
                                         {/* Read-only Grade Data */}
                                         <td className="px-4 py-4 whitespace-nowrap text-sm text-center font-bold text-blue-800 bg-blue-50">
-                                            {s.finalTheory ? s.finalTheory.toFixed(1) : '-'}
+                                            {s.finalTheory ? s.finalTheory.toFixed(2) : '-'}
                                         </td>
-                                        <td className="px-4 py-4 whitespace-nowrap text-sm text-center font-bold text-orange-800 bg-orange-50">
-                                            {s.finalPractical ? s.finalPractical.toFixed(1) : '-'}
+                                        <td className="px-4 py-4 whitespace-nowrap text-sm text-center font-bold text-purple-800 bg-purple-50">
+                                            {s.finalPractical ? s.finalPractical.toFixed(2) : '-'}
                                         </td>
                                         <td className="px-4 py-4 whitespace-nowrap text-sm text-center font-bold text-gray-900 bg-gray-100">
-                                            {s.finalGrade ? s.finalGrade.toFixed(1) : '-'}
+                                            {s.finalGrade ? s.finalGrade.toFixed(2) : '-'}
                                         </td>
 
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -459,8 +459,8 @@ export const StudentsPage: React.FC = () => {
                         </div>
                         <form onSubmit={handleSave} className="p-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                <div className="col-span-2 bg-blue-50 p-4 rounded-md border border-blue-100 mb-2">
-                                    <h4 className="text-sm font-bold text-blue-900 mb-3">Matrícula e Turma</h4>
+                                <div className="col-span-2 bg-orange-50 p-4 rounded-md border border-orange-100 mb-2">
+                                    <h4 className="text-sm font-bold text-orange-900 mb-3">Matrícula e Turma</h4>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">Turma</label>
@@ -491,7 +491,7 @@ export const StudentsPage: React.FC = () => {
                                             </select>
                                         </div>
                                     </div>
-                                    <p className="text-xs text-blue-600 mt-2">
+                                    <p className="text-xs text-orange-600 mt-2">
                                         * O número de Matrícula, Registro e CAP-BA serão gerados automaticamente com base na ordem alfabética da turma e no status do aluno.
                                     </p>
                                 </div>
@@ -550,6 +550,34 @@ export const StudentsPage: React.FC = () => {
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">Nome do Pai</label>
                                     <input className={inputClass} value={studentForm.fatherName || ''} onChange={e => setStudentForm({ ...studentForm, fatherName: e.target.value.toUpperCase() })} />
+                                </div>
+                            </div>
+
+                            {/* Documents Section */}
+                            <div className="bg-orange-50 p-4 rounded-md border border-orange-100 mb-6">
+                                <h4 className="text-sm font-bold text-orange-900 mb-3 flex items-center">
+                                    <FileText size={16} className="mr-2" />
+                                    Documentos
+                                </h4>
+                                <div className="border-2 border-dashed border-orange-200 rounded-lg p-6 text-center bg-white">
+                                    <div className="flex flex-col items-center justify-center">
+                                        <div className="p-3 bg-orange-100 rounded-full mb-3">
+                                            <Upload className="text-orange-600" size={24} />
+                                        </div>
+                                        <p className="text-sm text-gray-600 mb-2">
+                                            Arraste e solte arquivos aqui ou clique para selecionar
+                                        </p>
+                                        <p className="text-xs text-gray-400 mb-4">
+                                            (Máximo: 10 arquivos)
+                                        </p>
+                                        <button
+                                            type="button"
+                                            onClick={() => alert('Funcionalidade ainda não implementada.')}
+                                            className="px-4 py-2 bg-white border border-gray-300 rounded text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
+                                        >
+                                            Adicionar Documento
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 

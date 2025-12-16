@@ -150,8 +150,14 @@ export const ProfilePage: React.FC = () => {
                             </div>
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">CPF (Não editável)</label>
-                            <input disabled type="text" className={`${inputClass} bg-gray-100 text-gray-500 cursor-not-allowed`} value={formatCPF(formData.cpf)} />
+                            <label className="block text-sm font-medium text-gray-700">CPF</label>
+                            <input
+                                type="text"
+                                className={inputClass}
+                                value={formatCPF(formData.cpf)}
+                                onChange={e => setFormData({ ...formData, cpf: formatCPF(e.target.value) })}
+                                maxLength={14}
+                            />
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700">Email</label>

@@ -1,11 +1,11 @@
 import React, { useState, useMemo } from 'react';
 import { useStore } from '../context/AppStore';
 import { UserRole, Folder, DocumentFile } from '../types';
-import { Folder as FolderIcon, FileText, Plus, Trash2, Download, Search, ChevronRight, Upload } from 'lucide-react';
+import { Folder as FolderIcon, FileText, Plus, Trash2, Download, Search, ChevronRight, Upload, Edit2 } from 'lucide-react';
 import { FileUpload } from '../components/FileUpload';
 
 export const DocumentsPage: React.FC = () => {
-    const { currentUser, folders, documents, addFolder, deleteFolder, addDocument, deleteDocument, uploadDocument, getSignedDocumentUrl } = useStore();
+    const { currentUser, folders, documents, addFolder, updateFolder, deleteFolder, addDocument, deleteDocument, uploadDocument, getSignedDocumentUrl } = useStore();
     const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [showFolderModal, setShowFolderModal] = useState(false);
@@ -15,6 +15,8 @@ export const DocumentsPage: React.FC = () => {
     const [uploadingFile, setUploadingFile] = useState<File | null>(null);
     const [isUploading, setIsUploading] = useState(false);
     const [newDocData, setNewDocData] = useState({ name: '', url: '', type: 'PDF' });
+    const [renamingFolder, setRenamingFolder] = useState<Folder | null>(null);
+    const [renameString, setRenameString] = useState('');
 
     if (!currentUser) return null;
 
@@ -44,13 +46,26 @@ export const DocumentsPage: React.FC = () => {
 
     // Filtered Content - only show folders user has access to
     const currentFolders = folders.filter(f => {
-        if (f.parentId !== currentFolderId) return false;
-        // If no roles specified, folder is public
+        // 1. Check Location
+        const isAtCurrentLocation = currentFolderId === null
+            ? (!f.parentId || f.parentId === '' || f.parentId === 'null' || f.parentId === 'undefined')
+            : (f.parentId === currentFolderId);
+
+        if (!isAtCurrentLocation) return false;
+
+        // 2. Check Permissions
+        // Gestor and Coordenador see EVERYTHING
+        if (currentUser.role === UserRole.GESTOR || currentUser.role === UserRole.COORDENADOR) return true;
+
         if (!f.allowedRoles || f.allowedRoles.length === 0) return true;
-        // Check if user's role is in allowed roles
         return f.allowedRoles.includes(currentUser.role);
     });
-    const currentDocs = documents.filter(d => d.folderId === currentFolderId);
+    const currentDocs = documents.filter(d => {
+        if (currentFolderId === null) {
+            return !d.folderId || d.folderId === '';
+        }
+        return d.folderId === currentFolderId;
+    });
 
     const handleCreateFolder = () => {
         if (!newFolderName) return;
@@ -66,6 +81,24 @@ export const DocumentsPage: React.FC = () => {
         setNewFolderName('');
         setSelectedRoles([]);
         setShowFolderModal(false);
+    };
+
+    const handleStartRename = (folder: Folder) => {
+        setRenamingFolder(folder);
+        setRenameString(folder.name);
+    };
+
+    const handleConfirmRename = async () => {
+        if (!renamingFolder || !renameString.trim()) return;
+
+        const updatedFolder: Folder = {
+            ...renamingFolder,
+            name: renameString
+        };
+
+        await updateFolder(updatedFolder);
+        setRenamingFolder(null);
+        setRenameString('');
     };
 
     const toggleRole = (role: string) => {
@@ -221,7 +254,7 @@ export const DocumentsPage: React.FC = () => {
                                 <Plus size={18} /> <span>Nova Pasta</span>
                             </button>
                         )}
-                        {canUploadDocuments && (
+                        {canUploadDocuments && currentFolderId !== null && (
                             <button
                                 onClick={() => setShowDocModal(true)}
                                 className="btn-premium flex items-center space-x-2 bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white px-4 py-2 rounded-lg shadow-md transition"
@@ -266,12 +299,22 @@ export const DocumentsPage: React.FC = () => {
                         <div className="flex items-center justify-between mb-2">
                             <FolderIcon className="text-yellow-500 fill-current" size={32} />
                             {canManageFolders && (
-                                <button
-                                    onClick={(e) => { e.stopPropagation(); deleteFolder(folder.id); }}
-                                    className="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition"
-                                >
-                                    <Trash2 size={16} />
-                                </button>
+                                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition">
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); handleStartRename(folder); }}
+                                        className="text-gray-400 hover:text-blue-500 p-1"
+                                        title="Renomear Pasta"
+                                    >
+                                        <Edit2 size={16} />
+                                    </button>
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); deleteFolder(folder.id); }}
+                                        className="text-gray-400 hover:text-red-500 p-1"
+                                        title="Excluir Pasta"
+                                    >
+                                        <Trash2 size={16} />
+                                    </button>
+                                </div>
                             )}
                         </div>
                         <h3 className="font-medium text-gray-900 truncate">{folder.name}</h3>
@@ -341,7 +384,7 @@ export const DocumentsPage: React.FC = () => {
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Nome da Pasta</label>
                                     <input
-                                        className={inputClass}
+                                        className={`${inputClass} no-uppercase`}
                                         placeholder="Digite o nome da pasta"
                                         value={newFolderName}
                                         onChange={e => setNewFolderName(e.target.value)}
@@ -415,7 +458,7 @@ export const DocumentsPage: React.FC = () => {
                                 <div>
                                     <label className="block text-xs font-medium text-gray-700 mb-1">Nome</label>
                                     <input
-                                        className={inputClass}
+                                        className={`${inputClass} no-uppercase`}
                                         value={newDocData.name}
                                         onChange={e => setNewDocData({ ...newDocData, name: e.target.value })}
                                         placeholder="Ex: Manual de Procedimentos"
@@ -451,6 +494,41 @@ export const DocumentsPage: React.FC = () => {
                     </div>
                 )
             }
+            {/* Rename Folder Modal */}
+            {renamingFolder && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 animate-backdrop">
+                    <div className="bg-white p-6 rounded-xl shadow-2xl w-full max-w-sm animate-scale-in">
+                        <h3 className="text-lg font-bold mb-4 text-gray-900">Renomear Pasta</h3>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Novo Nome</label>
+                                <input
+                                    className={`${inputClass} no-uppercase`}
+                                    value={renameString}
+                                    onChange={e => setRenameString(e.target.value)}
+                                    autoFocus
+                                    placeholder="Nome da pasta"
+                                />
+                                <p className="text-xs text-gray-500 mt-1">Dica: O sistema diferencia maiúsculas de minúsculas.</p>
+                            </div>
+                        </div>
+                        <div className="flex justify-end gap-2 mt-6">
+                            <button
+                                onClick={() => setRenamingFolder(null)}
+                                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 font-medium transition"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={handleConfirmRename}
+                                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium shadow-md transition"
+                            >
+                                Salvar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div >
     );
 };

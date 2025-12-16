@@ -32,7 +32,20 @@ export const EvaluationsPage: React.FC = () => {
     useEffect(() => {
         if (classStudents.length > 0) {
             const initialMap: { [key: string]: Student } = {};
-            classStudents.forEach(s => initialMap[s.id] = { ...s });
+            classStudents.forEach(s => {
+                const formattedGrades = { ...s.grades };
+                // Format existing numeric grades to 2 decimals
+                Object.keys(formattedGrades).forEach(key => {
+                    const val = formattedGrades[key];
+                    if (typeof val === 'number') {
+                        formattedGrades[key] = val.toFixed(2);
+                    } else if (typeof val === 'string' && !isNaN(Number(val)) && val !== '' && !schema?.timeFields?.includes(key)) {
+                        // Also format string numbers if they aren't time fields (like '10' -> '10.00')
+                        formattedGrades[key] = parseFloat(val).toFixed(2);
+                    }
+                });
+                initialMap[s.id] = { ...s, grades: formattedGrades };
+            });
             setTempGrades(initialMap);
             setIsEditing(false);
         }
@@ -95,7 +108,7 @@ export const EvaluationsPage: React.FC = () => {
         if (!student) return;
 
         const isTimeField = schema?.timeFields?.includes(field);
-        const parsedValue = isTimeField ? value : (value === '' ? 0 : parseFloat(value));
+        const parsedValue = value; // Keep as string to support typing "10.0" without auto-formatting to "10"
 
         const newGrades = { ...student.grades, [field]: parsedValue };
         const { finalTheory, finalPractical, finalGrade } = calculateGrades(student, newGrades);
@@ -129,6 +142,19 @@ export const EvaluationsPage: React.FC = () => {
         };
 
         setTempGrades(prev => ({ ...prev, [studentId]: updatedStudent }));
+    };
+
+    const handleBlur = (studentId: string, field: string, value: string) => {
+        if (!isEditing) return;
+        const isTimeField = schema?.timeFields?.includes(field);
+        if (isTimeField) return;
+
+        if (value !== '' && !isNaN(Number(value))) {
+            const formatted = parseFloat(value).toFixed(2);
+            if (formatted !== value) {
+                handleGradeChange(studentId, field, formatted);
+            }
+        }
     };
 
     const handleSaveChanges = () => {
@@ -254,10 +280,10 @@ export const EvaluationsPage: React.FC = () => {
                 s.name,
                 s.enrollmentStatus,
                 ...theoryValues,
-                s.finalTheory?.toFixed(1) || '0.0',
+                s.finalTheory?.toFixed(2) || '0.00',
                 ...practiceValues,
-                s.finalPractical?.toFixed(1) || '0.0',
-                s.finalGrade?.toFixed(1) || '0.0'
+                s.finalPractical?.toFixed(2) || '0.00',
+                s.finalGrade?.toFixed(2) || '0.00'
             ];
         });
 
@@ -310,7 +336,7 @@ export const EvaluationsPage: React.FC = () => {
 
     const formatPlaceholder = (field: string) => {
         if (schema?.timeFields?.includes(field)) return 'mm:ss';
-        return '0.0';
+        return '0.00';
     };
 
     const classGradeLogs = gradeLogs
@@ -432,7 +458,7 @@ export const EvaluationsPage: React.FC = () => {
                                                     <td key={col} className="px-1 py-1 border-l border-gray-100">
                                                         <input
                                                             className={gradeInputClass}
-                                                            type="number" step="0.1" min="0" max="10"
+                                                            type="number" step="0.25" min="0" max="10"
                                                             placeholder="0.0"
                                                             value={s.grades[col] === undefined ? '' : s.grades[col]}
                                                             onChange={e => handleGradeChange(s.id, col, e.target.value)}
@@ -441,7 +467,7 @@ export const EvaluationsPage: React.FC = () => {
                                                     </td>
                                                 ))}
                                                 <td className={`px-1 py-1 bg-blue-50 font-bold text-center text-sm border-l border-blue-100 ${s.finalTheory < 7 ? 'text-red-600' : 'text-blue-900'}`}>
-                                                    {s.finalTheory.toFixed(1)}
+                                                    {s.finalTheory.toFixed(2)}
                                                 </td>
 
                                                 {/* Practice Inputs */}
@@ -450,7 +476,7 @@ export const EvaluationsPage: React.FC = () => {
                                                         <input
                                                             className={gradeInputClass}
                                                             type={getInputType(col)}
-                                                            step={getInputType(col) === 'number' ? "0.1" : undefined}
+                                                            step={getInputType(col) === 'number' ? "0.25" : undefined}
                                                             min={getInputType(col) === 'number' ? "0" : undefined}
                                                             max={getInputType(col) === 'number' ? "10" : undefined}
                                                             placeholder={formatPlaceholder(col)}
@@ -461,10 +487,10 @@ export const EvaluationsPage: React.FC = () => {
                                                     </td>
                                                 ))}
                                                 <td className={`px-1 py-1 bg-orange-50 font-bold text-center text-sm border-l border-orange-100 ${s.finalPractical < 7 ? 'text-red-600' : 'text-orange-900'}`}>
-                                                    {s.finalPractical.toFixed(1)}
+                                                    {s.finalPractical.toFixed(2)}
                                                 </td>
                                                 <td className={`px-1 py-1 bg-gray-100 font-bold text-center text-sm sticky right-0 z-10 border-l border-gray-200 ${s.finalGrade < 7 ? 'text-red-600' : 'text-gray-900'}`}>
-                                                    {s.finalGrade.toFixed(1)}
+                                                    {s.finalGrade.toFixed(2)}
                                                 </td>
                                             </tr>
                                         );

@@ -529,7 +529,7 @@ export const ClassesPage: React.FC = () => {
         const end = getLocalDate(cls.endDate);
 
         if (today < start) return { label: 'A Iniciar', color: 'bg-blue-50 text-blue-700 border border-blue-200' };
-        if (today > end) return { label: 'Finalizada', color: 'bg-gray-100 text-gray-600 border border-gray-200' };
+        if (today > end) return { label: 'Finalizada', color: 'bg-transparent text-gray-600 border border-gray-200' };
         return { label: 'Em Andamento', color: 'bg-green-50 text-green-700 border border-green-200' };
     };
 
@@ -578,15 +578,15 @@ export const ClassesPage: React.FC = () => {
                 <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200 border-collapse">
                         <thead>
-                            <tr className="bg-green-100 text-green-900">
-                                {!readOnly && <th className="px-2 py-3 text-center text-xs font-bold uppercase border border-green-200 w-16">Ordem</th>}
-                                <th className="px-4 py-3 text-center text-xs font-bold uppercase border border-green-200">DATA</th>
-                                <th className="px-4 py-3 text-center text-xs font-bold uppercase border border-green-200">Horário</th>
-                                <th className="px-4 py-3 text-center text-xs font-bold uppercase border border-green-200 min-w-[150px]">Módulo</th>
-                                <th className="px-4 py-3 text-left text-xs font-bold uppercase border border-green-200 min-w-[300px]">Disciplina</th>
-                                <th className="px-2 py-3 text-center text-xs font-bold uppercase border border-green-200">Tempos</th>
-                                <th className="px-4 py-3 text-center text-xs font-bold uppercase border border-green-200 min-w-[280px]">Instrutor(es)</th>
-                                {readOnly && currentUser?.role === UserRole.INSTRUTOR && <th className="px-4 py-3 text-center text-xs font-bold uppercase border border-green-200">Ações</th>}
+                            <tr className="bg-orange-100 text-orange-900">
+                                {!readOnly && <th className="px-2 py-3 text-center text-xs font-bold uppercase border border-orange-200 w-16">Ordem</th>}
+                                <th className="px-4 py-3 text-center text-xs font-bold uppercase border border-orange-200">DATA</th>
+                                <th className="px-4 py-3 text-center text-xs font-bold uppercase border border-orange-200">Horário</th>
+                                <th className="px-4 py-3 text-center text-xs font-bold uppercase border border-orange-200 min-w-[150px]">Módulo</th>
+                                <th className="px-4 py-3 text-left text-xs font-bold uppercase border border-orange-200 min-w-[300px]">Disciplina</th>
+                                <th className="px-2 py-3 text-center text-xs font-bold uppercase border border-orange-200">Tempos</th>
+                                <th className="px-4 py-3 text-center text-xs font-bold uppercase border border-orange-200 min-w-[280px]">Instrutor(es)</th>
+                                {readOnly && currentUser?.role === UserRole.INSTRUTOR && <th className="px-4 py-3 text-center text-xs font-bold uppercase border border-orange-200">Ações</th>}
                             </tr>
                         </thead>
                         <tbody className="bg-white">
@@ -602,7 +602,7 @@ export const ClassesPage: React.FC = () => {
                                 const isAssignedToMe = item.instructorIds.includes(currentUser?.id || '');
 
                                 return (
-                                    <tr key={item.id} className="hover:bg-gray-50">
+                                    <tr key={item.id} className="hover:bg-orange-50">
                                         {!readOnly && (
                                             <td className="px-2 py-2 border border-gray-300 text-center bg-white">
                                                 <div className="flex flex-col items-center gap-1">
@@ -626,13 +626,13 @@ export const ClassesPage: React.FC = () => {
                                             </td>
                                         )}
                                         {showDate && (
-                                            <td rowSpan={dateSpan} className="px-4 py-2 whitespace-nowrap text-sm font-bold text-gray-900 bg-green-50 border border-gray-300 text-center align-middle">
+                                            <td rowSpan={dateSpan} className="px-4 py-2 whitespace-nowrap text-sm font-bold text-gray-900 bg-white border border-orange-200 text-center align-middle">
                                                 {readOnly ? dateObj.toLocaleDateString('pt-BR') : (
                                                     <input type="date" value={item.date} onChange={e => onUpdate && onUpdate(item.id, 'date', e.target.value)} className="bg-transparent border-none text-center focus:ring-0 p-0 text-sm font-bold text-gray-900" />
                                                 )}
                                             </td>
                                         )}
-                                        <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900 border border-gray-300 text-center bg-green-50 font-medium">
+                                        <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900 border border-orange-200 text-center bg-white font-medium">
                                             {readOnly ? `${item.startTime} às ${item.endTime}` : (
                                                 <div className="flex items-center justify-center space-x-1">
                                                     <input type="time" value={item.startTime} onChange={e => onUpdate && onUpdate(item.id, 'startTime', e.target.value)} className="w-16 bg-white rounded border border-gray-300 text-xs p-1 focus:ring-0 text-center text-gray-900" />
@@ -642,18 +642,18 @@ export const ClassesPage: React.FC = () => {
                                             )}
                                         </td>
                                         {showModule && (
-                                            <td rowSpan={moduleSpan} className="px-4 py-2 text-sm text-gray-900 border border-gray-300 text-center align-middle bg-green-50 font-bold break-words">
+                                            <td rowSpan={moduleSpan} className="px-4 py-2 text-sm text-gray-900 border border-orange-200 text-center align-middle bg-white font-bold break-words">
                                                 {item.moduleId}
                                             </td>
                                         )}
-                                        <td className="px-4 py-2 text-sm font-medium text-gray-900 border border-gray-300 bg-gray-50 break-words">
+                                        <td className="px-4 py-2 text-sm font-medium text-gray-900 border border-orange-200 bg-white break-words">
                                             {subject?.name}
                                             <div className="text-xs text-gray-500 font-normal">{subject?.modality}</div>
                                         </td>
-                                        <td className="px-4 py-2 text-sm text-gray-900 border border-gray-300 text-center bg-gray-50">
+                                        <td className="px-4 py-2 text-sm text-gray-900 border border-orange-200 text-center bg-white">
                                             {item.duration}
                                         </td>
-                                        <td className="px-2 py-1 border border-gray-300 bg-white">
+                                        <td className="px-2 py-1 border border-orange-200 bg-white">
                                             <MultiSelect
                                                 options={instructors}
                                                 selectedIds={item.instructorIds || []}
@@ -662,7 +662,7 @@ export const ClassesPage: React.FC = () => {
                                             />
                                         </td>
                                         {readOnly && currentUser?.role === UserRole.INSTRUTOR && (
-                                            <td className="px-2 py-1 border border-gray-300 text-center bg-white">
+                                            <td className="px-2 py-1 border border-orange-200 text-center bg-white">
                                                 {isAssignedToMe && (
                                                     <button
                                                         onClick={() => handleSwapClick(item)}
@@ -800,7 +800,7 @@ export const ClassesPage: React.FC = () => {
 
                             {/* Column 3: Configuration */}
                             <div className="space-y-4">
-                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 shadow-sm">
+                                <div className="bg-orange-50 p-4 rounded-lg border border-orange-100 shadow-sm">
                                     <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 flex items-center">
                                         <span className="w-2 h-2 bg-primary-500 rounded-full mr-2"></span>
                                         Configuração
@@ -1037,7 +1037,7 @@ export const ClassesPage: React.FC = () => {
                                     </div>
                                 )}
                             </div>
-                            <div className="bg-gray-50 px-6 py-3 border-t border-gray-100 flex justify-between items-center">
+                            <div className="bg-transparent px-6 py-3 border-t border-gray-100 flex justify-between items-center">
                                 <span className={`text-xs font-medium px-2 py-1 rounded-full ${status.color}`}>
                                     {status.label}
                                 </span>
