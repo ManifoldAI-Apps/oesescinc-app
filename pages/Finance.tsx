@@ -38,6 +38,8 @@ export const FinancePage: React.FC = () => {
     const [yearFilter, setYearFilter] = useState('');   // Default to ALL to match Dashboard
     const [showSetupTeardown, setShowSetupTeardown] = useState(true); // Toggle for Setup/Teardown (Extract)
     const [showPerformanceSetup, setShowPerformanceSetup] = useState(true); // Toggle for Setup/Teardown (Performance)
+    const [statsPage, setStatsPage] = useState(1);
+    const STATS_ITEMS_PER_PAGE = 10;
 
     if (!currentUser) return null;
 
@@ -229,7 +231,15 @@ export const FinancePage: React.FC = () => {
     const instructorStats = useMemo(() => {
         if (isInstructor) return []; // Don't calculate for single instructor view
 
-        // Group raw items by instructor
+        // 1. Identify all eligible users (Instructors, Assistants, Managers, Coordinators)
+        const eligibleUsers = users.filter(u =>
+            u.role === UserRole.INSTRUTOR ||
+            u.role === UserRole.AUXILIAR_INSTRUCAO ||
+            u.role === UserRole.GESTOR ||
+            u.role === UserRole.COORDENADOR
+        );
+
+        // 2. Initialize Stats Map with ALL eligible users
         const statsMap: {
             [key: string]: {
                 id: string,
@@ -244,36 +254,48 @@ export const FinancePage: React.FC = () => {
             }
         } = {};
 
+        eligibleUsers.forEach(u => {
+            statsMap[u.id] = {
+                id: u.id,
+                name: u.name,
+                role: u.role,
+                totalHours: 0,
+                totalValue: 0,
+                paidValue: 0,
+                pendingValue: 0,
+                classesParticipated: new Set(),
+                totalEvents: 0
+            };
+        });
+
+        // 3. Aggregate Data from Financial Items
         rawFinancialItems.forEach(item => {
             // Filter out setup/teardown if toggle is off
             if (!showPerformanceSetup && (item.type === 'Montagem' || item.type === 'Desmontagem')) return;
 
-            if (!statsMap[item.instructorId]) {
-                statsMap[item.instructorId] = {
-                    id: item.instructorId,
-                    name: item.instructorName,
-                    role: item.instructorRole,
-                    totalHours: 0,
-                    totalValue: 0,
-                    paidValue: 0,
-                    pendingValue: 0,
-                    classesParticipated: new Set(),
-                    totalEvents: 0
-                };
+            // Only process if user is in our eligible map (should be always true if roles match)
+            if (statsMap[item.instructorId]) {
+                statsMap[item.instructorId].totalHours += item.hours ?? 0;
+                statsMap[item.instructorId].totalValue += item.value;
+                if (item.status === 'Pago') {
+                    statsMap[item.instructorId].paidValue += item.value;
+                } else {
+                    statsMap[item.instructorId].pendingValue += item.value;
+                }
+                statsMap[item.instructorId].classesParticipated.add(item.classId);
+                statsMap[item.instructorId].totalEvents += 1;
             }
-            statsMap[item.instructorId].totalHours += item.hours ?? 0;
-            statsMap[item.instructorId].totalValue += item.value;
-            if (item.status === 'Pago') {
-                statsMap[item.instructorId].paidValue += item.value;
-            } else {
-                statsMap[item.instructorId].pendingValue += item.value;
-            }
-            statsMap[item.instructorId].classesParticipated.add(item.classId);
-            statsMap[item.instructorId].totalEvents += 1;
         });
 
         return Object.values(statsMap).sort((a, b) => b.totalValue - a.totalValue);
-    }, [rawFinancialItems, isInstructor, showPerformanceSetup]);
+    }, [rawFinancialItems, isInstructor, showPerformanceSetup, users]);
+
+    // Pagination Logic for Instructor Stats
+    const statsTotalPages = Math.ceil(instructorStats.length / STATS_ITEMS_PER_PAGE);
+    const paginatedInstructorStats = useMemo(() => {
+        const start = (statsPage - 1) * STATS_ITEMS_PER_PAGE;
+        return instructorStats.slice(start, start + STATS_ITEMS_PER_PAGE);
+    }, [instructorStats, statsPage]);
 
 
     // --- Actions ---
@@ -495,9 +517,9 @@ export const FinancePage: React.FC = () => {
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
-                                {instructorStats.map((stat, idx) => (
+                                {paginatedInstructorStats.map((stat, idx) => (
                                     <tr
-                                        key={idx}
+                                        key={stat.id}
                                         className={`hover:bg-blue-50 cursor-pointer transition-colors ${instructorFilter === stat.id ? 'bg-blue-100 ring-2 ring-blue-500' : ''}`}
                                         onClick={() => setInstructorFilter(instructorFilter === stat.id ? '' : stat.id)}
                                         title="Clique para filtrar o extrato abaixo"
@@ -527,6 +549,72 @@ export const FinancePage: React.FC = () => {
                             </tbody>
                         </table>
                     </div>
+                    {/* Pagination Controls */}
+                    {instructorStats.length > 0 && (
+                        <div className="flex items-center justify-between px-6 py-3 border-t border-gray-200 bg-gray-50">
+                            <div className="flex-1 flex justify-between sm:hidden">
+                                <button
+                                    onClick={() => setStatsPage(p => Math.max(1, p - 1))}
+                                    disabled={statsPage === 1}
+                                    className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+                                >
+                                    Anterior
+                                </button>
+                                <button
+                                    onClick={() => setStatsPage(p => Math.min(statsTotalPages, p + 1))}
+                                    disabled={statsPage === statsTotalPages}
+                                    className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+                                >
+                                    Próxima
+                                </button>
+                            </div>
+                            <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                                <div>
+                                    <p className="text-sm text-gray-700">
+                                        Mostrando <span className="font-medium">{(statsPage - 1) * 10 + 1}</span> até <span className="font-medium">{Math.min(statsPage * 10, instructorStats.length)}</span> de <span className="font-medium">{instructorStats.length}</span> resultados
+                                    </p>
+                                </div>
+                                <div>
+                                    <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                                        <button
+                                            onClick={() => setStatsPage(p => Math.max(1, p - 1))}
+                                            disabled={statsPage === 1}
+                                            className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                                        >
+                                            <span className="sr-only">Anterior</span>
+                                            {/* Chevron Left */}
+                                            <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                                <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+                                            </svg>
+                                        </button>
+                                        {[...Array(statsTotalPages)].map((_, i) => (
+                                            <button
+                                                key={i + 1}
+                                                onClick={() => setStatsPage(i + 1)}
+                                                className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${statsPage === i + 1
+                                                    ? 'z-10 bg-indigo-50 border-indigo-500 text-indigo-600'
+                                                    : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                                                    }`}
+                                            >
+                                                {i + 1}
+                                            </button>
+                                        ))}
+                                        <button
+                                            onClick={() => setStatsPage(p => Math.min(statsTotalPages, p + 1))}
+                                            disabled={statsPage === statsTotalPages}
+                                            className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                                        >
+                                            <span className="sr-only">Próxima</span>
+                                            {/* Chevron Right */}
+                                            <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                                <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                                            </svg>
+                                        </button>
+                                    </nav>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
 
