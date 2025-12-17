@@ -298,6 +298,94 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         fetchInitialData();
     }, []);
 
+    // --- Realtime Subscriptions ---
+    useEffect(() => {
+        if (!isSupabaseConfigured()) return;
+
+        console.log('🔌 Setting up Realtime Subscriptions...');
+
+        const channel = supabase.channel('db-changes')
+            .on(
+                'postgres_changes',
+                { event: '*', schema: 'public', table: 'classes' },
+                (payload) => {
+                    console.log('🔔 Realtime Class Update:', payload);
+                    if (payload.eventType === 'INSERT') {
+                        const newClass = mapClassFromDB(payload.new);
+                        setClasses(prev => {
+                            if (prev.some(c => c.id === newClass.id)) return prev;
+                            return [...prev, newClass];
+                        });
+                    } else if (payload.eventType === 'UPDATE') {
+                        const updatedClass = mapClassFromDB(payload.new);
+                        setClasses(prev => prev.map(c => c.id === updatedClass.id ? updatedClass : c));
+                    } else if (payload.eventType === 'DELETE') {
+                        setClasses(prev => prev.filter(c => c.id !== payload.old.id));
+                    }
+                }
+            )
+            .on(
+                'postgres_changes',
+                { event: '*', schema: 'public', table: 'swap_requests' },
+                (payload) => {
+                    console.log('🔔 Realtime Swap Request Update:', payload);
+                    if (payload.eventType === 'INSERT') {
+                        const newSwap = mapSwapRequestFromDB(payload.new);
+                        setSwapRequests(prev => {
+                            if (prev.some(s => s.id === newSwap.id)) return prev;
+                            return [...prev, newSwap];
+                        });
+                    } else if (payload.eventType === 'UPDATE') {
+                        const updatedSwap = mapSwapRequestFromDB(payload.new);
+                        setSwapRequests(prev => prev.map(s => s.id === updatedSwap.id ? updatedSwap : s));
+                    } else if (payload.eventType === 'DELETE') {
+                        setSwapRequests(prev => prev.filter(s => s.id !== payload.old.id));
+                    }
+                }
+            )
+            .on(
+                'postgres_changes',
+                { event: '*', schema: 'public', table: 'notifications' },
+                (payload) => {
+                    console.log('🔔 Realtime Notification Update:', payload);
+                    if (payload.eventType === 'INSERT') {
+                        const newNotif = mapNotificationFromDB(payload.new);
+                        setNotifications(prev => {
+                            if (prev.some(n => n.id === newNotif.id)) return prev;
+                            return [newNotif, ...prev];
+                        });
+                    } else if (payload.eventType === 'UPDATE') {
+                        const updatedNotif = mapNotificationFromDB(payload.new);
+                        setNotifications(prev => prev.map(n => n.id === updatedNotif.id ? updatedNotif : n));
+                    }
+                }
+            )
+            .on(
+                'postgres_changes',
+                { event: '*', schema: 'public', table: 'payments' },
+                (payload) => {
+                    console.log('🔔 Realtime Payment Update:', payload);
+                    if (payload.eventType === 'INSERT') {
+                        const newPayment = mapPaymentFromDB(payload.new);
+                        setPayments(prev => {
+                            if (prev.some(p => p.id === newPayment.id)) return prev;
+                            return [...prev, newPayment];
+                        });
+                    } else if (payload.eventType === 'DELETE') {
+                        setPayments(prev => prev.filter(p => p.id !== payload.old.id));
+                    }
+                }
+            )
+            .subscribe((status) => {
+                console.log('🔌 Realtime Subscription Status:', status);
+            });
+
+        return () => {
+            console.log('🔌 Cleaning up Realtime Subscriptions...');
+            supabase.removeChannel(channel);
+        };
+    }, []);
+
     const seedDatabase = async () => {
         console.log("🌱 Database seeding is disabled.");
     };
